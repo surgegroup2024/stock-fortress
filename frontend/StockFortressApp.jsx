@@ -31,37 +31,40 @@ const ACTION = {
 // ─── DEMO TICKERS ───
 const DEMOS = {
   HIMS: {
-    meta: { ticker: "HIMS", company_name: "Hims & Hers Health, Inc.", sector: "Healthcare / Telehealth", current_price: "$15.80", market_cap: "$3.6B", pe_ratio: "30.86", fifty_two_week_range: "$15.63 - $72.98", avg_volume: "46.75M", report_date: "Feb 13, 2026", data_freshness_note: "Market close Feb 12, 2026" },
+    meta: { ticker: "HIMS", company_name: "Hims & Hers Health, Inc.", sector: "Healthcare / Telehealth", current_price: "$15.80", market_cap: "$3.6B", trailing_pe: "30.86", forward_pe: "22.50", fifty_two_week_range: "$15.63 - $72.98", avg_volume: "46.75M", beta: "1.2", report_date: "Feb 13, 2026", data_freshness_note: "Market close Feb 12, 2026" },
     step_1_know_what_you_own: { one_liner: "Hims sells prescription medications online — you chat with a doctor on your phone, and pills arrive by mail.", how_it_makes_money: "Monthly subscriptions for prescription drugs (hair loss, ED, skincare, weight loss). Cash-pay, no insurance. Also sells OTC supplements and skincare.", key_products_or_services: ["Telehealth consultations", "Hair loss Rx (finasteride, minoxidil)", "Sexual health Rx (sildenafil, tadalafil)", "Compounded GLP-1 weight loss drugs", "Skincare, mental health, supplements"], customer_type: "Millennials & Gen-Z wanting convenient, affordable healthcare", pass_fail: "YES" },
-    step_2_check_the_financials: { revenue_latest: "$599M (Q3 2025)", revenue_growth_yoy: "+49%", profitable: true, net_income_latest: "$15.8M", gross_margin: "74%", debt_level: "LOW", free_cash_flow: "$79.4M", financial_health_grade: "B", red_flags: ["Gross margin declining (79% → 74% YoY)", "Revenue per subscriber falling ($84 → $74)", "~35% of revenue from GLP-1s under legal threat", "EPS missed estimates by 40% in Q3"], green_flags: ["Revenue growing 49-111% YoY", "FCF positive at $79M/quarter", "2.5M subscribers and growing", "First GAAP profitable year in 2024"] },
-    step_3_understand_the_story: { bull_case: "Scale leader in DTC telehealth with 2.5M subs. GLP-1 crackdown is temporary — core business (hair, skin, ED) was growing before weight loss. At $3.6B for a $2.3B rev company, absurdly cheap if the platform holds.", bear_case: "Business model built on regulatory arbitrage — selling cheap copies of patented drugs. Novo suing, FDA cracking down, DOJ referred. If enforcement extends beyond GLP-1, entire model at risk.", what_must_go_right: ["Core non-GLP-1 subs keep growing", "Novo lawsuit settles reasonably", "FDA stays limited to GLP-1 enforcement", "Branded partnerships replace some revenue"], what_could_go_wrong: ["FDA bans all mass compounding", "DOJ opens criminal investigation", "Subscriber churn accelerates", "Brand permanently damaged"], is_this_priced_in: "Stock down 78% from peak. Market pricing severe permanent impairment. If only GLP-1 goes away but core holds, stock is undervalued." },
-    step_4_know_the_risks: { top_3_risks: [{ risk: "Novo Nordisk patent lawsuit", severity: "CRITICAL", explanation: "Could permanently ban all compounded semaglutide + damages" }, { risk: "FDA enforcement expansion", severity: "HIGH", explanation: "If enforcement moves beyond GLP-1, entire compounding model breaks" }, { risk: "DOJ criminal referral", severity: "HIGH", explanation: "HHS referred HIMS to DOJ — criminal investigation possible" }], recent_red_flags: ["Feb 9: Novo files patent suit", "Feb 7: HIMS pulls GLP-1 pill after FDA pressure", "Feb 6: FDA crackdown on compounded GLP-1s", "Feb 6: HHS refers HIMS to DOJ", "Stock down 52% in 9 days"], regulatory_exposure: "EXTREME", concentration_risk: "~35% revenue from compounded GLP-1s under threat" },
-    step_5_check_the_competition: { main_competitors: [{ name: "Ro (Roman)", why_they_compete: "Same DTC telehealth model", advantage_over_this_stock: "More vertically integrated, pivoted to branded GLP-1 earlier" }, { name: "LifeMD", why_they_compete: "DTC telehealth with weight management", advantage_over_this_stock: "Less regulatory exposure" }, { name: "Teladoc", why_they_compete: "Largest telehealth platform", advantage_over_this_stock: "B2B model, diversified revenue" }], moat_strength: "WEAK", moat_explanation: "Strong brand and 2.5M subs, but limited pricing power. Generic drugs are commodities and compounding arbitrage is being eliminated." },
-    step_6_valuation_reality_check: { current_pe: "30.86x", sector_avg_pe: "~25x", price_to_sales: "~1.5x", is_it_expensive: "CHEAP", valuation_context: "At 1.5x forward revenue, priced like a company in permanent decline. Even removing GLP-1, core ~$1.5B biz at 3x rev = more than current cap.", bear_case_price: "$8-12", base_case_price: "$30-40", bull_case_price: "$55-62" },
-    step_7_verdict: { action: "WATCH", confidence: "MEDIUM", one_line_reason: "Asymmetric setup, but buying before Feb 23 earnings is gambling, not investing.", what_would_change_this: "Feb 23 earnings showing core sub growth + 2026 guidance → BUY. FDA expands enforcement → AVOID.", most_important_metric_to_track: "Non-GLP-1 subscriber net adds (Q4 2025)", suggested_revisit_date: "February 23, 2026" },
-    investor_gut_check: { question_1: "Are you buying because you researched it, or because you saw it crash?", question_2: "If it drops another 30% on bad earnings, buy more or panic sell?", question_3: "Can you explain the Novo lawsuit without looking it up?", question_4: "What % of your portfolio? Can you afford to lose it all?", mindset_reminder: "A stock that falls 78% isn't automatically cheap. It can fall another 50%. The Feb 23 report tells you if you're catching a knife or finding a bargain. Wait for the data." }
+    step_2_check_the_financials: { latest_quarter: "Q3 2025", revenue_latest: "$599M", revenue_growth_yoy: "+49%", revenue_beat_miss: "BEAT", eps_latest: "$0.08", eps_beat_miss: "MISS (40%)", net_income_latest: "$15.8M", profitable: true, gross_margin: "74%", operating_margin_trend: "Compressing", debt_level: "LOW", free_cash_flow_latest: "$79.4M", cash_position: "$250M", financial_health_grade: "B", red_flags: ["Gross margin declining (79% → 74% YoY)", "Revenue per subscriber falling ($84 → $74)", "~35% of revenue from GLP-1s under legal threat", "EPS missed estimates by 40% in Q3"], green_flags: ["Revenue growing 49-111% YoY", "FCF positive at $79M/quarter", "2.5M subscribers and growing", "First GAAP profitable year in 2024"] },
+    step_2a_earnings_and_guidance_review: { one_time_items: "GAAP vs Adjusted: Stock-based comp of $45M excluded from adjusted figures.", segment_breakdown: "Telehealth subscriptions: +52% YoY ($420M, 70% of rev). Weight loss: +180% YoY ($130M). Dermatology: +18% YoY ($49M).", guidance_changes: "FY2026 revenue guide: $2.3-2.5B (prev $2.1-2.3B). EPS: $0.35-0.50. [FORWARD-LOOKING]", management_tone: "Cautious — 'We remain confident in our core business, but acknowledge regulatory headwinds require us to diversify revenue streams.'", analyst_reaction: "2 downgrades post-earnings (Morgan Stanley, Jefferies). 1 upgrade (Piper Sandler). Avg PT cut from $45 to $28.", forward_statements_note: "All guidance and outlook flagged as [FORWARD-LOOKING] with significant regulatory uncertainty." },
+    step_3_understand_the_story: { bull_case: "Scale leader in DTC telehealth with 2.5M subs. GLP-1 crackdown is temporary — core business (hair, skin, ED) was growing before weight loss. At $3.6B for a $2.3B rev company, absurdly cheap if the platform holds.", base_case: "Steady core growth.", bear_case: "Business model built on regulatory arbitrage — selling cheap copies of patented drugs. Novo suing, FDA cracking down, DOJ referred. If enforcement extends beyond GLP-1, entire model at risk.", what_must_go_right: ["Core non-GLP-1 subs keep growing", "Novo lawsuit settles reasonably", "FDA stays limited to GLP-1 enforcement", "Branded partnerships replace some revenue"], what_could_break_the_story: ["FDA bans all mass compounding", "DOJ opens criminal investigation", "Subscriber churn accelerates", "Brand permanently damaged"], macro_overlay: "GLP-1 regulation is the key macro driver for this sector currently.", catalyst_timeline: ["Feb 23: Q4 earnings release"] },
+    step_4_know_the_risks: { top_risks: [{ risk: "Novo Nordisk patent lawsuit", severity: "CRITICAL", likelihood: "HIGH", explanation: "Could permanently ban all compounded semaglutide + damages" }, { risk: "FDA enforcement expansion", severity: "HIGH", likelihood: "MEDIUM", explanation: "If enforcement moves beyond GLP-1, entire compounding model breaks" }, { risk: "DOJ criminal referral", severity: "HIGH", likelihood: "HIGH", explanation: "HHS referred HIMS to DOJ — criminal investigation possible" }], ownership_signals: "Insider selling trend in late 2025.", regulatory_exposure: "EXTREME", concentration_risk: "~35% revenue from compounded GLP-1s under threat" },
+    step_5_check_the_competition: { main_competitors: [{ name: "Ro (Roman)", why_compete: "Same DTC telehealth model", their_advantage: "More vertically integrated, pivoted to branded GLP-1 earlier" }], moat_strength: "WEAK", moat_explanation: "Strong brand and 2.5M subs, but limited pricing power. Generic drugs are commodities." },
+    step_6_valuation_reality_check: { current_pe: "30.86x", forward_pe: "22.50x", sector_or_peer_avg_pe: "25x", price_to_sales: "1.5x", ev_ebitda_if_relevant: "10x", simple_dcf_implied_value: "TTM FCF $318M × 15% 5yr growth [ASSUMPTION] × 3% terminal [ASSUMPTION] × 10% discount = ~$22/share implied value", is_it_expensive: "CHEAP", valuation_context: "At 1.5x forward revenue, priced like a company in permanent decline.", bear_case_target: "$8-12", base_case_target: "$30", bull_case_target: "$55" },
+    step_7_verdict: { action: "WATCH", confidence: "MEDIUM", one_line_reason: "Asymmetric setup, but buying before Feb 23 earnings is gambling.", what_signal_would_change_this: "Feb 23 earnings showing core sub growth + 2026 guidance", most_important_metric_to_track: "Non-GLP-1 subscriber net adds (Q4 2025)", suggested_revisit_date: "February 23, 2026" },
+    investor_gut_check: { question_1: "Ready to hold?", question_2: "Upside?", question_3: "Lawsuit scope?", question_4: "Size?", mindset_reminder: "Stock-specific warning based on current situation" }
   },
   AAPL: {
-    meta: { ticker: "AAPL", company_name: "Apple Inc.", sector: "Technology / Consumer Electronics", current_price: "$232.50", market_cap: "$3.5T", pe_ratio: "37.2", fifty_two_week_range: "$169.21 - $260.10", avg_volume: "52.3M", report_date: "Feb 13, 2026", data_freshness_note: "Market close Feb 12, 2026" },
-    step_1_know_what_you_own: { one_liner: "Apple makes iPhones, Macs, and iPads, and charges you monthly for services like iCloud, Apple Music, and the App Store.", how_it_makes_money: "~52% from iPhone sales, ~25% from Services (App Store, iCloud, Apple Pay, Music, TV+), rest from Mac, iPad, Wearables. Services segment is high-margin recurring revenue.", key_products_or_services: ["iPhone", "Mac & iPad", "Services (App Store, iCloud, Music, TV+)", "Wearables (Apple Watch, AirPods)", "Apple Intelligence / AI features"], customer_type: "Global consumers and professionals locked into the Apple ecosystem", pass_fail: "YES" },
-    step_2_check_the_financials: { revenue_latest: "$124.3B (Q1 FY2026)", revenue_growth_yoy: "+4%", profitable: true, net_income_latest: "$36.3B (Q1)", gross_margin: "46.9%", debt_level: "MODERATE", free_cash_flow: "$30.6B (Q1)", financial_health_grade: "A", red_flags: ["iPhone growth slowing in key markets", "China revenue declining amid competition", "Regulatory pressure on App Store fees globally", "AI features behind competitors"], green_flags: ["Services growing 14% YoY at 75%+ margins", "$30B+ quarterly FCF", "Massive buyback program ($110B authorized)", "2B+ active devices = sticky ecosystem"] },
-    step_3_understand_the_story: { bull_case: "Largest tech ecosystem ever built with 2B+ devices. Services is becoming dominant profit driver at 75%+ margins. Apple Intelligence brings AI features that drive upgrade cycles. Capital return program is unmatched.", bear_case: "Hardware growth is saturating. China market share eroding to Huawei. Regulators forcing App Store fee cuts globally. AI features lag behind Google and Samsung. At 37x earnings, priced for growth that's decelerating.", what_must_go_right: ["iPhone 17 cycle drives upgrades", "Services continues 14%+ growth", "Apple Intelligence drives real engagement", "India/emerging markets offset China weakness"], what_could_go_wrong: ["iPhone supercycle doesn't materialize", "EU/DOJ forces major App Store changes", "China bans or restricts Apple further", "AI perceived as inferior to Android"], is_this_priced_in: "At $3.5T, the market expects steady mid-single-digit growth + services expansion. Any acceleration in AI adoption is upside; any deceleration in services or China deterioration is downside." },
-    step_4_know_the_risks: { top_3_risks: [{ risk: "China revenue decline", severity: "HIGH", explanation: "Apple losing share to Huawei; geopolitical risk of restrictions" }, { risk: "Regulatory pressure on App Store", severity: "MEDIUM", explanation: "EU DMA, DOJ suit could force fee cuts on highest-margin business" }, { risk: "AI competitive gap", severity: "MEDIUM", explanation: "Apple Intelligence perceived as behind Google/Samsung AI features" }], recent_red_flags: ["China Q1 revenue down 11% YoY", "Apple Intelligence adoption slower than expected", "EU forcing sideloading and alternative app stores"], regulatory_exposure: "MODERATE — App Store fees under pressure in EU, US, Japan", concentration_risk: "iPhone still ~52% of revenue; Services depends on iPhone installed base" },
-    step_5_check_the_competition: { main_competitors: [{ name: "Samsung", why_they_compete: "Largest Android OEM, Galaxy AI", advantage_over_this_stock: "Faster AI feature rollout, stronger in Asia" }, { name: "Google", why_they_compete: "Android ecosystem, Pixel, Gemini AI", advantage_over_this_stock: "Superior AI/ML capabilities, controls the OS" }, { name: "Huawei", why_they_compete: "Premium smartphones in China", advantage_over_this_stock: "Dominant in China where Apple is losing" }], moat_strength: "STRONG", moat_explanation: "2B+ device ecosystem with extremely high switching costs. Services revenue locked into hardware base. Brand loyalty unmatched in consumer tech." },
-    step_6_valuation_reality_check: { current_pe: "37.2x", sector_avg_pe: "~30x", price_to_sales: "~8.5x", is_it_expensive: "EXPENSIVE", valuation_context: "Trading above sector avg on decelerating growth. Market paying a premium for ecosystem durability and capital returns. Justified only if services growth sustains 12%+.", bear_case_price: "$180-200", base_case_price: "$230-250", bull_case_price: "$280-310" },
-    step_7_verdict: { action: "WATCH", confidence: "MEDIUM", one_line_reason: "Great company at a full price. Wait for a better entry on any China/regulatory shock.", what_would_change_this: "iPhone 17 supercycle data or pullback to $200 → BUY. Services growth drops below 10% → AVOID.", most_important_metric_to_track: "Services revenue growth rate", suggested_revisit_date: "April 2026 (Q2 earnings)" },
-    investor_gut_check: { question_1: "Are you buying Apple because it's a great company, or because it feels 'safe'? Safe and overpriced can still lose you money.", question_2: "If Apple drops 20% on a China ban headline, do you have conviction to hold?", question_3: "Can you explain why Services matters more than iPhone growth?", question_4: "At $3.5T, how much upside is realistically left in 12 months?", mindset_reminder: "Apple is one of the greatest companies ever built. That doesn't make it a great stock at every price. At 37x earnings with slowing growth, you're paying a premium for stability. Make sure that's what you need in your portfolio, not just comfort." }
+    meta: { ticker: "AAPL", company_name: "Apple Inc.", sector: "Technology / Consumer Electronics", current_price: "$232.50", market_cap: "$3.5T", trailing_pe: "37.2", forward_pe: "32.1", fifty_two_week_range: "$169.21 - $260.10", avg_volume: "52.3M", beta: "1.1", report_date: "Feb 13, 2026", data_freshness_note: "Market close Feb 12, 2026" },
+    step_1_know_what_you_own: { one_liner: "Apple makes iPhones, Macs, and iPads, and charges you monthly for services.", how_it_makes_money: "~52% from iPhone sales, ~25% from Services.", key_products_or_services: ["iPhone", "Services"], customer_type: "Global consumers", pass_fail: "YES" },
+    step_2_check_the_financials: { latest_quarter: "Q1 FY2026", revenue_latest: "$124.3B", revenue_growth_yoy: "+4%", revenue_beat_miss: "BEAT", eps_latest: "$2.18", eps_beat_miss: "BEAT", net_income_latest: "$36.3B", profitable: true, gross_margin: "46.9%", operating_margin_trend: "Stable", debt_level: "MODERATE", free_cash_flow_latest: "$30.6B", cash_position: "$160B", financial_health_grade: "A", red_flags: ["China growth slowing"], green_flags: ["FCF positive", "Buybacks"] },
+    step_2a_earnings_and_guidance_review: { one_time_items: "None notable. Clean GAAP quarter.", segment_breakdown: "iPhone: $69.1B (+1%). Services: $26.3B (+14%). Mac: $8.7B (+16%). iPad: $8.1B (+15%). Wearables: $12.1B (-2%).", guidance_changes: "No formal guidance given (Apple policy). Analysts expect Q2 rev ~$94B. [FORWARD-LOOKING]", management_tone: "Confident — 'Apple Intelligence is off to a very strong start and we're just getting started.'", analyst_reaction: "Broadly positive. 3 PT raises post-earnings. Consensus PT ~$255.", forward_statements_note: "Apple does not provide formal guidance. All estimates are consensus-based [FORWARD-LOOKING]." },
+    step_3_understand_the_story: { bull_case: "Apple Intelligence supercycle.", base_case: "Steady growth.", bear_case: "Regulatory fees cut.", what_must_go_right: ["AI adoption"], what_could_break_the_story: ["China ban"], macro_overlay: "Tech regulation trends", catalyst_timeline: ["April Earnings"] },
+    step_4_know_the_risks: { top_risks: [{ risk: "China", severity: "HIGH", likelihood: "MEDIUM", explanation: "Revenue drop" }], ownership_signals: "Stable", regulatory_exposure: "MODERATE", concentration_risk: "iPhone" },
+    step_5_check_the_competition: { main_competitors: [{ name: "Samsung", why_compete: "Premium phones", their_advantage: "AI speed" }], moat_strength: "STRONG", moat_explanation: "Device ecosystem" },
+    step_6_valuation_reality_check: { current_pe: "37.2x", forward_pe: "32.1x", sector_or_peer_avg_pe: "30x", price_to_sales: "8.5x", ev_ebitda_if_relevant: "25x", simple_dcf_implied_value: "TTM FCF $112B × 8% growth [ASSUMPTION] × 3% terminal × 10% discount = ~$210/share implied", is_it_expensive: "EXPENSIVE", valuation_context: "Trading at historical premium.", bear_case_target: "$180", base_case_target: "$230", bull_case_target: "$300" },
+    step_7_verdict: { action: "WATCH", confidence: "HIGH", one_line_reason: "Great biz, full price.", what_signal_would_change_this: "Pullback to $200", most_important_metric_to_track: "Services growth", suggested_revisit_date: "April 2026" },
+    investor_gut_check: { question_1: "Safe haven?", question_2: "Upside?", question_3: "Services?", question_4: "Size?", mindset_reminder: "Premium price" }
   },
   TSLA: {
-    meta: { ticker: "TSLA", company_name: "Tesla, Inc.", sector: "Automotive / Energy / AI", current_price: "$345.20", market_cap: "$1.1T", pe_ratio: "155x", fifty_two_week_range: "$138.80 - $488.54", avg_volume: "78.5M", report_date: "Feb 13, 2026", data_freshness_note: "Market close Feb 12, 2026" },
-    step_1_know_what_you_own: { one_liner: "Tesla makes electric cars, but investors are really betting on self-driving taxis, robots, and energy storage becoming massive businesses.", how_it_makes_money: "~78% from car sales (Model 3/Y/S/X/Cybertruck), ~10% from energy storage (Megapack), ~7% from services, and regulatory credits. Robotaxi and Optimus robot are pre-revenue.", key_products_or_services: ["Electric vehicles (Model 3/Y/S/X, Cybertruck)", "Energy storage (Megapack, Powerwall)", "Full Self-Driving (FSD) software", "Robotaxi (planned launch)", "Optimus humanoid robot (development)"], customer_type: "EV buyers, energy companies, and speculative investors betting on future AI/robotics", pass_fail: "YES" },
-    step_2_check_the_financials: { revenue_latest: "$25.7B (Q4 2025)", revenue_growth_yoy: "+2%", profitable: true, net_income_latest: "$2.3B", gross_margin: "19.8%", debt_level: "LOW", free_cash_flow: "$2.0B", financial_health_grade: "C", red_flags: ["Auto margins compressed from 28% to under 20%", "Revenue growth near zero — price cuts not driving volume", "155x P/E assumes massive future growth not yet visible", "Elon's political activities polarizing the customer base"], green_flags: ["Energy storage growing 60%+ YoY", "FSD improving rapidly with real-world data", "$34B cash on balance sheet", "Robotaxi could be transformative if it launches"] },
-    step_3_understand_the_story: { bull_case: "Tesla isn't a car company — it's an AI company that happens to sell cars. FSD becomes autonomous, robotaxi generates Uber-like margins, Optimus creates a new industry. Energy storage is already scaling. $1.1T is cheap for all three.", bear_case: "It IS a car company. Cars are commoditizing, margins are falling, growth is stalling. Robotaxi is years away from regulatory approval at scale. At 155x earnings, any disappointment causes massive downside. Elon's controversies are costing real sales.", what_must_go_right: ["Robotaxi launches in 2026 with regulatory approval", "FSD reaches true Level 4 autonomy", "Auto margins stabilize above 18%", "Energy storage maintains 50%+ growth"], what_could_go_wrong: ["Robotaxi delayed again beyond 2026", "BYD/Chinese EVs take global share", "FSD causes high-profile accidents", "Elon distraction costs more sales"], is_this_priced_in: "At $1.1T and 155x earnings, the market is pricing in robotaxi success, energy dominance, AND margin recovery. None of these are certain. The stock price assumes a future that hasn't happened yet." },
-    step_4_know_the_risks: { top_3_risks: [{ risk: "Robotaxi regulatory delay", severity: "CRITICAL", explanation: "The entire valuation premium depends on autonomous driving working at scale" }, { risk: "Auto margin compression", severity: "HIGH", explanation: "Price war with BYD/legacy OEMs could push margins below 15%" }, { risk: "Brand/demand destruction", severity: "HIGH", explanation: "Elon's political involvement measurably reducing demand in key markets" }], recent_red_flags: ["European sales down 45% in Jan 2026", "Model Y showing age vs new competition", "FSD still not Level 4 anywhere", "Multiple executive departures in 2025"], regulatory_exposure: "HIGH — Autonomous driving regs vary by state/country", concentration_risk: "Model 3/Y = ~80% of sales. Robotaxi/Optimus = 0% of current revenue but majority of valuation" },
-    step_5_check_the_competition: { main_competitors: [{ name: "BYD", why_they_compete: "Largest EV maker globally, half Tesla's price", advantage_over_this_stock: "Lower costs, dominant in China, expanding globally fast" }, { name: "Waymo (Alphabet)", why_they_compete: "Leading autonomous driving service", advantage_over_this_stock: "Already operating robotaxis commercially in multiple cities" }, { name: "Rivian / Legacy OEMs", why_they_compete: "Competing EV offerings across segments", advantage_over_this_stock: "Established dealer networks, diverse product lines" }], moat_strength: "MODERATE", moat_explanation: "Supercharger network, FSD data advantage, and manufacturing scale are real moats. But EV hardware is commoditizing fast, and Waymo leads in actual autonomous operations." },
-    step_6_valuation_reality_check: { current_pe: "155x", sector_avg_pe: "~15x (auto) / ~35x (tech)", price_to_sales: "~11x", is_it_expensive: "SPECULATIVE", valuation_context: "Trading at 10x the auto sector P/E and 4x the tech sector P/E. The market is valuing robotaxi + energy + Optimus at ~$800B+ despite generating $0 revenue. You're buying a bet on 2028+ earnings.", bear_case_price: "$150-200", base_case_price: "$300-350", bull_case_price: "$500-700" },
-    step_7_verdict: { action: "AVOID", confidence: "MEDIUM", one_line_reason: "Great company, terrible valuation. Too much future embedded in today's price with too many execution risks.", what_would_change_this: "Stock pulls back to $200 (bringing P/E to ~80x) → WATCH. Robotaxi achieves regulatory approval in 3+ states → reassess entirely.", most_important_metric_to_track: "Robotaxi regulatory milestones and FSD intervention rates", suggested_revisit_date: "After Q2 2026 earnings + robotaxi update" },
-    investor_gut_check: { question_1: "Are you buying Tesla the business, or Tesla the Elon Musk fan club?", question_2: "At 155x earnings, can you explain what needs to happen to justify this price?", question_3: "If robotaxi is delayed another 2 years, are you still comfortable holding?", question_4: "What percentage of your portfolio is this? Concentration in a speculative stock is how portfolios blow up.", mindset_reminder: "Tesla could absolutely be worth $2 trillion in 2030 if robotaxi and energy play out. It could also be worth $300 billion if they don't. At $1.1T today, you're paying closer to the optimistic outcome. Ask yourself: am I being paid to take this risk, or am I paying for the privilege?" }
+    meta: { ticker: "TSLA", company_name: "Tesla, Inc.", sector: "Automotive / AI", current_price: "$345.20", market_cap: "$1.1T", trailing_pe: "155", forward_pe: "100", fifty_two_week_range: "$138.80 - $488.54", avg_volume: "78.5M", beta: "2.5", report_date: "Feb 13, 2026", data_freshness_note: "Market close Feb 12, 2026" },
+    step_1_know_what_you_own: { one_liner: "Tesla makes EVs and develops AI/robots.", how_it_makes_money: "Car sales and energy storage.", key_products_or_services: ["EVs", "Energy"], customer_type: "Tech-savvy people", pass_fail: "YES" },
+    step_2_check_the_financials: { latest_quarter: "Q4 2025", revenue_latest: "$25.7B", revenue_growth_yoy: "+2%", revenue_beat_miss: "MISS", eps_latest: "$0.72", eps_beat_miss: "MISS", net_income_latest: "$2.3B", profitable: true, gross_margin: "19.8%", operating_margin_trend: "Compressing", debt_level: "LOW", free_cash_flow_latest: "$2.0B", cash_position: "$34B", financial_health_grade: "C", red_flags: ["Margin compression"], green_flags: ["Energy growth"] },
+    step_2a_earnings_and_guidance_review: { one_time_items: "$600M restructuring charge (Austin layoffs). Adjusted EPS $0.85 vs GAAP $0.72.", segment_breakdown: "Automotive: $19.8B (-3%). Energy/Storage: $3.1B (+67%). Services: $2.8B (+12%).", guidance_changes: "FY2026 deliveries: 2.1-2.3M vehicles (flat-ish). Energy: 100GWh target [FORWARD-LOOKING]", management_tone: "Defensive — 'The market doesn't appreciate the optionality in our robotaxi and Optimus programs.'", analyst_reaction: "Mixed. 2 downgrades (Goldman, UBS). 1 upgrade (Wedbush). Wide PT range: $85-$550.", forward_statements_note: "Robotaxi timeline and Optimus revenue projections are [FORWARD-LOOKING] with high uncertainty." },
+    step_3_understand_the_story: { bull_case: "AI/Robot/Energy leader.", base_case: "Car company.", bear_case: "Commoditized auto.", what_must_go_right: ["Robotaxi"], what_could_break_the_story: ["Reg delay"], macro_overlay: "EV adoption rates", catalyst_timeline: ["2026 Robotaxi"] },
+    step_4_know_the_risks: { top_risks: [{ risk: "Regs", severity: "CRITICAL", likelihood: "HIGH", explanation: "Robotaxi delay" }], ownership_signals: "Elon selling", regulatory_exposure: "HIGH", concentration_risk: "Elon key man" },
+    step_5_check_the_competition: { main_competitors: [{ name: "BYD", why_compete: "Same market", their_advantage: "Cost" }], moat_strength: "MODERATE", moat_explanation: "Brand and data" },
+    step_6_valuation_reality_check: { current_pe: "155x", forward_pe: "100x", sector_or_peer_avg_pe: "30x", price_to_sales: "10x", ev_ebitda_if_relevant: "50x", simple_dcf_implied_value: "TTM FCF $8B × 20% growth [ASSUMPTION] × 3% terminal × 12% discount (high beta) = ~$120/share implied", is_it_expensive: "SPECULATIVE", valuation_context: "AI premium priced in.", bear_case_target: "$150", base_case_target: "$300", bull_case_target: "$500" },
+    step_7_verdict: { action: "WATCH", confidence: "LOW", one_line_reason: "Extreme valuation.", what_signal_would_change_this: "Margin recovery", most_important_metric_to_track: "Auto margins", suggested_revisit_date: "April 2026" },
+    investor_gut_check: { question_1: "AI bet?", question_2: "Growth?", question_3: "Elon?", question_4: "Risk?", mindset_reminder: "High volatility" }
   }
 };
 
@@ -70,6 +73,7 @@ const STEPS = [
   { k: "landing", l: "", i: "", n: 0 },
   { k: "s1", l: "Know What You Own", i: "🏢", n: 1 },
   { k: "s2", l: "Check Financials", i: "📊", n: 2 },
+  { k: "s2a", l: "Earnings Deep-Dive", i: "🔍", n: "2A" },
   { k: "s3", l: "Understand The Story", i: "📖", n: 3 },
   { k: "s4", l: "Know The Risks", i: "⚠️", n: 4 },
   { k: "s5", l: "Competition", i: "⚔️", n: 5 },
@@ -77,6 +81,7 @@ const STEPS = [
   { k: "s7", l: "The Verdict", i: "🎯", n: 7 },
   { k: "gut", l: "Gut Check", i: "🧠", n: 8 },
 ];
+const TOTAL_STEPS = STEPS.length - 1; // exclude landing
 
 // ─── STYLES ───
 const CSS = `
@@ -105,12 +110,22 @@ const Card = ({ children, delay = 0, glow, border: borderColor, style = {} }) =>
   }}>{children}</div>
 );
 
-const MetricRow = ({ label, value, hl }) => (
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: `1px solid ${T.border}22` }}>
-    <span style={{ color: T.textSec, fontSize: 13 }}>{label}</span>
-    <span style={{ color: hl || T.text, fontSize: 13, fontWeight: 600, fontFamily: "'IBM Plex Mono',monospace" }}>{value}</span>
-  </div>
-);
+const MetricRow = ({ label, value, hl }) => {
+  const v = typeof value === "string" ? value : (value ?? "").toString();
+  const isLong = v.length > 60;
+  if (isLong) return (
+    <div style={{ padding: "10px 0", borderBottom: `1px solid ${T.border}22` }}>
+      <div style={{ color: T.textSec, fontSize: 12, fontWeight: 700, letterSpacing: .5, textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
+      <div style={{ color: hl || T.text, fontSize: 13, lineHeight: 1.65, fontFamily: "'IBM Plex Mono',monospace" }}>{value}</div>
+    </div>
+  );
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14, padding: "10px 0", borderBottom: `1px solid ${T.border}22` }}>
+      <span style={{ color: T.textSec, fontSize: 13, flexShrink: 0 }}>{label}</span>
+      <span style={{ color: hl || T.text, fontSize: 13, fontWeight: 600, fontFamily: "'IBM Plex Mono',monospace", textAlign: "right", lineHeight: 1.4 }}>{value}</span>
+    </div>
+  );
+};
 
 const Flags = ({ items, type = "red" }) => {
   const c = type === "red" ? T.danger : T.accent;
@@ -171,7 +186,11 @@ function Landing({ d, onStart }) {
       </div>
     </Card>
     <Card delay={.2}>
-      <MetricRow label="P/E Ratio" value={m.pe_ratio} />
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: 80 }}><MetricRow label="Trailing P/E" value={m.trailing_pe || "N/A"} /></div>
+        <div style={{ flex: 1, minWidth: 80 }}><MetricRow label="Forward P/E" value={m.forward_pe || "N/A"} /></div>
+      </div>
+      <MetricRow label="Beta" value={m.beta || "N/A"} />
       <MetricRow label="Avg Volume" value={m.avg_volume} />
       <MetricRow label="Report Date" value={m.report_date} />
       <div style={{ fontSize: 10, color: T.textDim, marginTop: 6, fontStyle: "italic" }}>{m.data_freshness_note}</div>
@@ -217,14 +236,83 @@ function S2({ d }) {
         <span style={{ fontSize: 30, fontWeight: 700, color: g.c, fontFamily: "'IBM Plex Mono',monospace" }}>{s.financial_health_grade}</span></div>
       <div style={{ fontSize: 12, color: g.c, fontWeight: 600, marginTop: 5 }}>{g.l}</div></div></Card>
     <Card delay={.2}>
-      <MetricRow label="Revenue" value={s.revenue_latest} />
+      <SectionLabel color={T.textDim}>Latest: {s.latest_quarter}</SectionLabel>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16, gap: 15 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 9, fontWeight: 800, color: T.textDim, letterSpacing: 1, marginBottom: 4 }}>REVENUE</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: T.text, marginBottom: 6 }}>{s.revenue_latest}</div>
+          <Badge color={s.revenue_beat_miss === "BEAT" || (s.revenue_beat_miss?.includes("BEAT")) ? T.accent : T.danger}>{s.revenue_beat_miss}</Badge>
+        </div>
+        <div style={{ flex: 1, textAlign: "right" }}>
+          <div style={{ fontSize: 9, fontWeight: 800, color: T.textDim, letterSpacing: 1, marginBottom: 4 }}>EPS</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: T.text, marginBottom: 6 }}>{s.eps_latest}</div>
+          <Badge color={s.eps_beat_miss?.includes("BEAT") ? T.accent : T.danger}>{s.eps_beat_miss}</Badge>
+        </div>
+      </div>
       <MetricRow label="YoY Growth" value={s.revenue_growth_yoy} hl={T.accent} />
-      <MetricRow label="Net Income" value={s.net_income_latest} hl={s.profitable ? T.accent : T.danger} />
       <MetricRow label="Gross Margin" value={s.gross_margin} />
-      <MetricRow label="Free Cash Flow" value={s.free_cash_flow} hl={T.accent} />
+      <MetricRow label="Operating Margin" value={s.operating_margin_trend} />
+      <MetricRow label="FCF" value={s.free_cash_flow_latest} hl={T.accent} />
+      <MetricRow label="Cash" value={s.cash_position} hl={T.accent} />
       <MetricRow label="Debt" value={s.debt_level} hl={s.debt_level === "LOW" ? T.accent : T.warn} /></Card>
     <Card delay={.3}><SectionLabel color={T.danger}>🚩 Red Flags</SectionLabel><Flags items={s.red_flags} type="red" /></Card>
     <Card delay={.4}><SectionLabel color={T.accent}>✅ Green Flags</SectionLabel><Flags items={s.green_flags} type="green" /></Card>
+  </div>);
+}
+
+function S2A({ d }) {
+  const s = d.step_2a_earnings_and_guidance_review;
+  if (!s) return <Card><div style={{ fontSize: 13, color: T.textDim, textAlign: "center" }}>Earnings deep-dive data not available for this report.</div></Card>;
+  const toneColor = { Confident: T.accent, Cautious: T.warn, Defensive: T.danger, Uncertain: T.textDim }[s.management_tone?.split(/[—,]/)[0]?.trim()] || T.blue;
+  return (<div>
+    {/* Management Tone — the hook */}
+    <Card delay={.1} style={{ background: `linear-gradient(135deg,${toneColor}08,${T.card})`, border: `1px solid ${toneColor}30` }}>
+      <SectionLabel color={toneColor}>🎙️ Management Tone</SectionLabel>
+      <div style={{ fontSize: 14, color: T.text, lineHeight: 1.75, fontStyle: "italic", padding: "4px 0 4px 12px", borderLeft: `3px solid ${toneColor}60` }}>
+        "{s.management_tone}"
+      </div>
+    </Card>
+
+    {/* Segment Breakdown */}
+    <Card delay={.2}>
+      <SectionLabel color={T.blue}>📊 Segment Performance</SectionLabel>
+      <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.segment_breakdown}</div>
+    </Card>
+
+    {/* One-Time Items */}
+    {s.one_time_items && s.one_time_items !== "None" && (
+      <Card delay={.3} border={T.warn}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+          <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>⚠️</span>
+          <div>
+            <SectionLabel color={T.warn}>One-Time Adjustments</SectionLabel>
+            <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.one_time_items}</div>
+          </div>
+        </div>
+      </Card>
+    )}
+
+    {/* Guidance Changes — highlighted */}
+    <Card delay={.4} style={{ background: `linear-gradient(135deg,${T.accent}06,${T.blue}06)`, border: `1px solid ${T.accent}28` }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <SectionLabel color={T.accent} style={{ marginBottom: 0 }}>📈 Guidance Update</SectionLabel>
+        <Badge color={T.warn}>FORWARD-LOOKING</Badge>
+      </div>
+      <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.75 }}>{s.guidance_changes}</div>
+    </Card>
+
+    {/* Analyst Reaction */}
+    <Card delay={.5}>
+      <SectionLabel color={T.gold}>🏦 Analyst Reaction</SectionLabel>
+      <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.analyst_reaction}</div>
+    </Card>
+
+    {/* Forward Statements Disclaimer */}
+    {s.forward_statements_note && (
+      <div style={{ fontSize: 10, color: T.textDim, lineHeight: 1.5, padding: "8px 14px", background: `${T.surface}88`, borderRadius: 8, animation: "fi .4s ease .6s both", fontStyle: "italic" }}>
+        ℹ️ {s.forward_statements_note}
+      </div>
+    )}
   </div>);
 }
 
@@ -232,26 +320,32 @@ function S3({ d }) {
   const s = d.step_3_understand_the_story;
   return (<div>
     <Card delay={.1} border={T.accent}><SectionLabel color={T.accent}>Bull Case</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.bull_case}</div></Card>
+    <Card delay={.15}><SectionLabel color={T.blue}>Base Case</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.base_case}</div></Card>
     <Card delay={.2} border={T.danger}><SectionLabel color={T.danger}>Bear Case</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.bear_case}</div></Card>
-    <Card delay={.3}><SectionLabel color={T.accent}>Must Go Right</SectionLabel><Flags items={s.what_must_go_right} type="green" /></Card>
-    <Card delay={.4}><SectionLabel color={T.danger}>Could Go Wrong</SectionLabel><Flags items={s.what_could_go_wrong} type="red" /></Card>
-    <Card delay={.5} style={{ background: `linear-gradient(135deg,${T.blue}08,${T.accent}05)` }}><SectionLabel color={T.blue}>Is This Priced In?</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.is_this_priced_in}</div></Card>
+    <Card delay={.3} style={{ background: `linear-gradient(135deg,${T.bg2},${T.surface}44)` }}><SectionLabel color={T.gold}>Macro Overlay</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.macro_overlay}</div></Card>
+    <Card delay={.4}><SectionLabel color={T.accent}>Must Go Right</SectionLabel><Flags items={s.what_must_go_right} type="green" /></Card>
+    <Card delay={.5}><SectionLabel color={T.danger}>Bearish Catalysts</SectionLabel><Flags items={s.what_could_break_the_story} type="red" /></Card>
+    <Card delay={.6}><SectionLabel color={T.blue}>Timeline</SectionLabel>
+      {s.catalyst_timeline?.map((c, i) => (<div key={i} style={{ fontSize: 12, color: T.textSec, marginBottom: 5 }}>• {c}</div>))}
+    </Card>
   </div>);
 }
 
 function S4({ d }) {
   const s = d.step_4_know_the_risks;
   return (<div>
-    {s.top_3_risks.map((r, i) => (<Card key={i} delay={.1 * (i + 1)} border={SEVERITY[r.severity]}>
+    {s.top_risks.map((r, i) => (<Card key={i} delay={.1 * (i + 1)} border={SEVERITY[r.severity]}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: T.text, flex: 1, marginRight: 8 }}>{r.risk}</div>
-        <Badge color={SEVERITY[r.severity]}>{r.severity}</Badge></div>
+        <div style={{ display: "flex", gap: 4 }}>
+          <Badge color={SEVERITY[r.severity]}>{r.severity}</Badge>
+          <Badge color={T.textDim}>Prob: {r.likelihood}</Badge>
+        </div>
+      </div>
       <div style={{ fontSize: 12, color: T.textSec, lineHeight: 1.55 }}>{r.explanation}</div></Card>))}
-    <Card delay={.4}><SectionLabel color={T.danger}>Recent Red Flags</SectionLabel>
-      {s.recent_red_flags.map((f, i) => (<div key={i} style={{ fontSize: 12, color: T.textSec, lineHeight: 1.6, padding: "5px 0", borderBottom: `1px solid ${T.border}18`, animation: `fi .3s ease ${.08 * i}s both` }}>
-        <span style={{ color: T.danger, marginRight: 7 }}>●</span>{f}</div>))}</Card>
+    <Card delay={.4}><SectionLabel color={T.gold}>Ownership Signals</SectionLabel><div style={{ fontSize: 13, color: T.textSec }}>{s.ownership_signals}</div></Card>
     <Card delay={.5}>
-      <MetricRow label="Regulatory Exposure" value={s.regulatory_exposure} hl={T.danger} />
+      <MetricRow label="Regulatory" value={s.regulatory_exposure} hl={T.danger} />
       <div style={{ marginTop: 8, fontSize: 12, color: T.textSec, lineHeight: 1.55 }}><span style={{ color: T.warn, fontWeight: 600 }}>Concentration: </span>{s.concentration_risk}</div></Card>
   </div>);
 }
@@ -262,8 +356,8 @@ function S5({ d }) {
   return (<div>
     {s.main_competitors.map((c, i) => (<Card key={i} delay={.1 * (i + 1)}>
       <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 5 }}>{c.name}</div>
-      <div style={{ fontSize: 12, color: T.textDim, marginBottom: 7 }}>{c.why_they_compete}</div>
-      <div style={{ fontSize: 12, color: T.warn, lineHeight: 1.5 }}><span style={{ fontWeight: 600 }}>Edge: </span>{c.advantage_over_this_stock}</div></Card>))}
+      <div style={{ fontSize: 12, color: T.textDim, marginBottom: 7 }}>{c.why_compete}</div>
+      <div style={{ fontSize: 12, color: T.warn, lineHeight: 1.5 }}><span style={{ fontWeight: 600 }}>Edge: </span>{c.their_advantage}</div></Card>))}
     <Card delay={.4} glow><div style={{ textAlign: "center" }}>
       <SectionLabel color={T.textDim}>Competitive Moat</SectionLabel>
       <div style={{ display: "inline-block", padding: "7px 22px", borderRadius: 10, background: `${mc}18`, border: `2px solid ${mc}`, fontSize: 16, fontWeight: 700, color: mc, letterSpacing: 1 }}>{s.moat_strength}</div>
@@ -275,14 +369,40 @@ function S6({ d }) {
   const s = d.step_6_valuation_reality_check;
   const ec = { CHEAP: T.accent, FAIR: T.blue, EXPENSIVE: T.warn, SPECULATIVE: T.danger }[s.is_it_expensive] || T.text;
   return (<div>
-    <Card delay={.1}><MetricRow label="P/E" value={s.current_pe} /><MetricRow label="Sector Avg P/E" value={s.sector_avg_pe} /><MetricRow label="Price/Sales" value={s.price_to_sales} />
-      <div style={{ textAlign: "center", marginTop: 14 }}><Badge color={ec}>{s.is_it_expensive}</Badge></div></Card>
+    <Card delay={.1}>
+      <MetricRow label="Current P/E" value={s.current_pe} />
+      {s.forward_pe && <MetricRow label="Forward P/E" value={s.forward_pe} hl={T.blue} />}
+      <MetricRow label="P/S Ratio" value={s.price_to_sales} />
+      <MetricRow label="EV/EBITDA" value={s.ev_ebitda_if_relevant} />
+      <div style={{ textAlign: "center", marginTop: 14 }}><Badge color={ec}>{s.is_it_expensive}</Badge></div>
+    </Card>
+    {s.sector_or_peer_avg_pe && (
+      <Card delay={.15}>
+        <SectionLabel color={T.gold}>📊 Peer Comparison</SectionLabel>
+        <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.sector_or_peer_avg_pe}</div>
+      </Card>
+    )}
+    {s.simple_dcf_implied_value && (
+      <Card delay={.15} style={{ background: `linear-gradient(135deg,${T.bg2},${T.blue}06)`, border: `1px solid ${T.blue}28` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <SectionLabel color={T.blue}>🧮 DCF Implied Value</SectionLabel>
+          <Badge color={T.textDim}>ASSUMPTION</Badge>
+        </div>
+        <div style={{ fontSize: 12, color: T.textSec, lineHeight: 1.7, fontFamily: "'IBM Plex Mono',monospace" }}>{s.simple_dcf_implied_value}</div>
+      </Card>
+    )}
     <Card delay={.2}><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.valuation_context}</div></Card>
-    <Card delay={.3}><SectionLabel>Price Scenarios</SectionLabel>
-      {[{ l: "Bear", v: s.bear_case_price, c: T.danger }, { l: "Base", v: s.base_case_price, c: T.blue }, { l: "Bull", v: s.bull_case_price, c: T.accent }].map((x, i) => (
-        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 14px", borderRadius: 10, background: `${x.c}0A`, border: `1px solid ${x.c}28`, marginBottom: 7, animation: `fi .35s ease ${.12 * i}s both` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: x.c }} /><span style={{ fontSize: 13, color: T.textSec, fontWeight: 600 }}>{x.l}</span></div>
-          <span style={{ fontSize: 17, fontWeight: 700, color: x.c, fontFamily: "'IBM Plex Mono',monospace" }}>{x.v}</span></div>))}</Card>
+    <Card delay={.3}><SectionLabel>Price targets</SectionLabel>
+      {[{ l: "Bear", v: s.bear_case_target, c: T.danger }, { l: "Base", v: s.base_case_target, c: T.blue }, { l: "Bull", v: s.bull_case_target, c: T.accent }].map((x, i) => (
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, padding: "12px 14px", borderRadius: 10, background: `${x.c}0A`, border: `1px solid ${x.c}28`, marginBottom: 8, animation: `fi .35s ease ${.12 * i}s both` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7, flexShrink: 0, marginTop: 4 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: x.c }} />
+            <span style={{ fontSize: 13, color: T.textSec, fontWeight: 700 }}>{x.l}</span>
+          </div>
+          <div style={{ textAlign: "right", flex: 1 }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: x.c, fontFamily: "'IBM Plex Mono',monospace" }}>{x.v}</div>
+          </div>
+        </div>))}</Card>
   </div>);
 }
 
@@ -296,8 +416,8 @@ function S7({ d }) {
         <div style={{ fontSize: 34, fontWeight: 800, color: a.c, letterSpacing: 2, fontFamily: "'IBM Plex Mono',monospace" }}>{s.action}</div>
         <div style={{ marginTop: 7 }}><Badge color={T.textSec}>Confidence: {s.confidence}</Badge></div>
         <div style={{ fontSize: 14, color: T.text, lineHeight: 1.65, marginTop: 14, fontWeight: 500 }}>{s.one_line_reason}</div></div></Card>
-    <Card delay={.2}><SectionLabel color={T.blue}>What Changes This</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.what_would_change_this}</div></Card>
-    <Card delay={.3}><MetricRow label="Key Metric" value={s.most_important_metric_to_track} hl={T.accent} /><MetricRow label="Revisit" value={s.suggested_revisit_date} hl={T.warn} /></Card>
+    <Card delay={.2}><SectionLabel color={T.blue}>Signal to Change Course</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.what_signal_would_change_this}</div></Card>
+    <Card delay={.3}><MetricRow label="Tracking" value={s.most_important_metric_to_track} hl={T.accent} /><MetricRow label="Revisit" value={s.suggested_revisit_date} hl={T.warn} /></Card>
   </div>);
 }
 
@@ -366,9 +486,9 @@ export default function App() {
 
   const VIEWS = data ? {
     landing: <Landing d={data} onStart={next} />,
-    s1: <S1 d={data} onNext={next} />, s2: <S2 d={data} />, s3: <S3 d={data} />,
-    s4: <S4 d={data} />, s5: <S5 d={data} />, s6: <S6 d={data} />,
-    s7: <S7 d={data} />, gut: <Gut d={data} />,
+    s1: <S1 d={data} onNext={next} />, s2: <S2 d={data} />, s2a: <S2A d={data} />,
+    s3: <S3 d={data} />, s4: <S4 d={data} />, s5: <S5 d={data} />,
+    s6: <S6 d={data} />, s7: <S7 d={data} />, gut: <Gut d={data} />,
   } : {};
 
   // HOME SCREEN
@@ -428,7 +548,7 @@ export default function App() {
 
   const cur = STEPS[step];
   return (
-    <div style={{ maxWidth: 430, margin: "0 auto", height: "100vh", height: "100dvh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+    <div style={{ maxWidth: 430, margin: "0 auto", height: "100dvh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
       <style>{CSS}</style>
 
       {/* HEADER */}
@@ -446,10 +566,10 @@ export default function App() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <span style={{ fontSize: 14 }}>{cur.i}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>Step {cur.n <= 7 ? cur.n : ""}: {cur.l}</span></div>
-            <span style={{ fontSize: 11, color: T.textDim, fontFamily: "'IBM Plex Mono',monospace" }}>{step}/8</span></div>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>Step {cur.n}: {cur.l}</span></div>
+            <span style={{ fontSize: 11, color: T.textDim, fontFamily: "'IBM Plex Mono',monospace" }}>{step}/{TOTAL_STEPS}</span></div>
           <div style={{ width: "100%", height: 3, background: T.surface, borderRadius: 2, overflow: "hidden" }}>
-            <div style={{ width: `${(step / 8) * 100}%`, height: "100%", background: `linear-gradient(90deg,${T.accent},${T.blue})`, borderRadius: 2, transition: "width .4s cubic-bezier(.4,0,.2,1)" }} /></div>
+            <div style={{ width: `${(step / TOTAL_STEPS) * 100}%`, height: "100%", background: `linear-gradient(90deg,${T.accent},${T.blue})`, borderRadius: 2, transition: "width .4s cubic-bezier(.4,0,.2,1)" }} /></div>
         </div>)}
       </div>
 
