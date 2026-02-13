@@ -242,6 +242,10 @@ Return ONLY the JSON structure specified in the system prompt. No markdown fence
 # ─── API ENDPOINTS ───
 @app.get("/")
 def root():
+    # In production, serve the frontend; in dev, return API info
+    index = Path(__file__).parent / "static" / "index.html"
+    if index.exists():
+        return FileResponse(index)
     return {"service": "Stock Fortress API", "version": "1.0", "status": "active"}
 
 
