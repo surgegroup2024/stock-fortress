@@ -29,8 +29,10 @@ env_path = Path(__file__).parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from google import genai
 from google.genai import types
 
@@ -282,6 +284,22 @@ def health():
         "gemini_configured": bool(GEMINI_KEY),
         "cache_entries": len(_cache),
     }
+
+
+# ─── STATIC FILE SERVING (Production) ───
+STATIC_DIR = Path(__file__).parent / "static"
+if STATIC_DIR.exists():
+    # Serve built frontend assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+
+    # Serve other static files (manifest.json, icons, etc.)
+    @app.get("/{path:path}")
+    async def serve_spa(path: str):
+        file_path = STATIC_DIR / path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        # SPA fallback: serve index.html for all unmatched routes
+        return FileResponse(STATIC_DIR / "index.html")
 
 
 # ─── RUN ───
