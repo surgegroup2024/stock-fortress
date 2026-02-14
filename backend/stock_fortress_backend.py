@@ -48,12 +48,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Simple in-memory cache (use Redis in production)
+# ── Billing Router (Stripe) ──
+try:
+    from stripe_billing import router as billing_router
+    app.include_router(billing_router)
+    print("✅ Billing routes mounted at /api/billing/*")
+except ImportError as e:
+    print(f"⚠️ Billing module not loaded: {e}")
+
+
+import redis
+
+# Simple in-memory cache (fallback)
 _cache = {}
 CACHE_TTL = timedelta(hours=24)
 
+# Redis Connection
+REDIS_URL = os.environ.get("REDIS_URL", "")
+redis_client = None
+if REDIS_URL and "YOUR_PASSWORD_HERE" not in REDIS_URL:
+    try:
+        redis_client = redis.from_url(REDIS_URL, decode_responses=True, socket_timeout=5)
+        print("✅ Redis client initialized")
+    except Exception as e:
+        print(f"⚠️ Redis init failed: {e}")
 
 def get_cache(key: str) -> Optional[dict]:
+    # 1. Try Redis
+    if redis_client:
+        try:
+            data = redis_client.get(key)
+            if data:
+                return json.loads(data)
+        except Exception as e:
+            print(f"⚠️ Redis read error: {e}")
+
+    # 2. Fallback to Memory
     if key in _cache:
         entry = _cache[key]
         if datetime.now() - entry["ts"] < CACHE_TTL:
@@ -63,6 +93,14 @@ def get_cache(key: str) -> Optional[dict]:
 
 
 def set_cache(key: str, data: dict):
+    # 1. Try Redis
+    if redis_client:
+        try:
+            redis_client.setex(key, int(CACHE_TTL.total_seconds()), json.dumps(data))
+        except Exception as e:
+            print(f"⚠️ Redis write error: {e}")
+
+    # 2. Always write to Memory (as backup/layered cache)
     _cache[key] = {"data": data, "ts": datetime.now()}
 
 # ─── GEMINI ANALYSIS (with Google Search Grounding) ───
