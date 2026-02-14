@@ -5,6 +5,7 @@ import { T, CSS, STEPS } from "../theme";
 import { Badge, Card, MetricRow } from "../components/atoms";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "../lib/supabase";
+import Watchlist from "../components/Watchlist";
 
 function ReportsTab({ user }) {
     const [reports, setReports] = useState([]);
@@ -59,59 +60,7 @@ function ReportsTab({ user }) {
 }
 
 function WatchlistTab({ user }) {
-    const [items, setItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        supabase
-            .from("watchlist_items")
-            .select("id, ticker, last_verdict, added_at")
-            .eq("user_id", user.id)
-            .order("added_at", { ascending: false })
-            .then(({ data }) => {
-                setItems(data || []);
-                setLoading(false);
-            });
-    }, [user]);
-
-    const remove = async (id) => {
-        await supabase.from("watchlist_items").delete().eq("id", id);
-        setItems(prev => prev.filter(i => i.id !== id));
-    };
-
-    if (loading) return <div style={{ padding: 20, color: T.textDim, fontSize: 13 }}>Loading watchlist...</div>;
-
-    if (items.length === 0) {
-        return (
-            <div style={{ textAlign: "center", padding: "40px 20px", background: T.card, borderRadius: 16, border: `1px solid ${T.border}` }}>
-                <div style={{ fontSize: 32, marginBottom: 12 }}>👀</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: T.text, marginBottom: 6 }}>No watched stocks yet</div>
-                <div style={{ fontSize: 13, color: T.textSec, marginBottom: 20 }}>Analyze a stock and tap 👀 Watch to track it here.</div>
-                <button onClick={() => navigate("/")} style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: `linear-gradient(135deg,${T.accent},#059669)`, color: "#FFF", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Analyze New Stock</button>
-            </div>
-        );
-    }
-
-    return (
-        <div style={{ display: "grid", gap: 12 }}>
-            {items.map((w) => {
-                const color = w.last_verdict === "BUY" ? T.accent : w.last_verdict === "AVOID" ? T.danger : T.blue;
-                return (
-                    <div key={w.id} style={{ background: T.card, padding: 16, borderRadius: 12, border: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <div onClick={() => navigate(`/report/${w.ticker}`)} style={{ cursor: "pointer", flex: 1 }}>
-                            <div style={{ fontSize: 16, fontWeight: 700, color: T.text, fontFamily: "'IBM Plex Mono',monospace" }}>{w.ticker}</div>
-                            <div style={{ fontSize: 11, color: T.textDim, marginTop: 4 }}>Added {new Date(w.added_at).toLocaleDateString()}</div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            {w.last_verdict && <Badge color={color}>{w.last_verdict}</Badge>}
-                            <button onClick={() => remove(w.id)} style={{ padding: "4px 8px", borderRadius: 6, border: `1px solid ${T.border}`, background: "transparent", color: T.textDim, fontSize: 10, cursor: "pointer" }}>✕</button>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-    );
+    return <Watchlist user={user} />;
 }
 
 function SettingsTab({ user, signOut }) {

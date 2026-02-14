@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { T, CSS } from "../theme";
 import { useAuth } from "../components/AuthProvider";
 import { useBilling } from "../billing";
+import ROICalculator from "./ROICalculator";
 
 export default function PricingPage() {
     const { user } = useAuth();
@@ -48,7 +49,12 @@ export default function PricingPage() {
 
     return (
         <div style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", color: T.text, padding: "20px" }}>
-            <style>{CSS}</style>
+            <style>{CSS}
+                {`
+                    .pricing-card { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+                    .pricing-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3); }
+                `}
+            </style>
 
             <nav style={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: 1000, margin: "0 auto 60px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }} onClick={() => navigate("/")}>
@@ -76,7 +82,7 @@ export default function PricingPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
                     {plans.map((p) => (
-                        <div key={p.name} style={{
+                        <div key={p.name} className="pricing-card" style={{
                             background: p.bg || T.card,
                             border: `1px solid ${p.border || T.border}`,
                             borderRadius: 20,
@@ -123,6 +129,9 @@ export default function PricingPage() {
                         </div>
                     ))}
                 </div>
+
+                <ROICalculator />
+
             </div>
         </div>
     );

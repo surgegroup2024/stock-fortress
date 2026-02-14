@@ -56,6 +56,14 @@ try:
 except ImportError as e:
     print(f"⚠️ Billing module not loaded: {e}")
 
+# ── Market Data Router ──
+try:
+    from market_data import router as market_router
+    app.include_router(market_router)
+    print("✅ Market Data routes mounted at /api/market-data/*")
+except ImportError as e:
+    print(f"⚠️ Market Data module not loaded: {e}")
+
 
 import redis
 
