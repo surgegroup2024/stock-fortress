@@ -18,6 +18,7 @@ Environment Variables:
 """
 
 import os
+import asyncio
 import json
 from datetime import datetime, timedelta
 from typing import Optional
@@ -63,6 +64,15 @@ try:
     print("✅ Market Data routes mounted at /api/market-data/*")
 except ImportError as e:
     print(f"⚠️ Market Data module not loaded: {e}")
+
+# ── Blog Engine Router ──
+try:
+    from blog_engine import router as blog_router, generate_blog_post
+    app.include_router(blog_router)
+    print("✅ Blog routes mounted at /api/blog/*")
+except ImportError as e:
+    generate_blog_post = None
+    print(f"⚠️ Blog module not loaded: {e}")
 
 
 import redis
@@ -324,6 +334,11 @@ async def get_report(ticker: str):
 
     # Cache and return
     set_cache(cache_key, report)
+
+    # Auto-generate blog post in background (non-blocking)
+    if generate_blog_post:
+        asyncio.create_task(generate_blog_post(ticker, report))
+
     return {"ticker": ticker, "cached": False, "report": report}
 
 

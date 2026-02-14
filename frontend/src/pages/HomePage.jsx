@@ -6,7 +6,7 @@ import { useAuth } from "../components/AuthProvider";
 
 const FEATURES = [
     { icon: "📝", title: "Wall Street Rigor, Automated", desc: "We don't just summarize news. Our AI runs a full institutional checklist—from valuation to moat analysis—on every stock." },
-    { icon: "📡", title: "Live Data, No Hallucinations", desc: "Powered by Gemini 1.5 and Google Search, our reports are grounded in up-to-the-minute financial data and latest filings." },
+    { icon: "📡", title: "Live Data, No Hallucinations", desc: "Powered by Stock Fortress AI and Google Search, our reports are grounded in up-to-the-minute financial data and latest filings." },
     { icon: "🔔", title: "Never Miss a Move", desc: "Track your portfolio candidates. Get notified when fundamentals shift or when a stock enters your buy zone." },
 ];
 
@@ -74,6 +74,7 @@ export default function HomePage() {
                     <span style={{ fontSize: 18, fontWeight: 700, color: "#FFF", letterSpacing: -0.5 }}>Stock Fortress</span>
                 </div>
                 <div className="desktop-links" style={{ gap: 16, alignItems: "center" }}>
+                    <Link to="/blog" style={{ color: "#FFF", fontSize: 14, fontWeight: 600, textDecoration: "none" }}>Blog</Link>
                     <Link to="/pricing" style={{ color: "#FFF", fontSize: 14, fontWeight: 600, textDecoration: "none" }}>Pricing</Link>
                     {user ? (
                         <Link to="/dashboard" style={{ padding: "10px 20px", borderRadius: 10, background: T.surface, color: T.text, fontSize: 14, fontWeight: 700, textDecoration: "none", border: `1px solid ${T.border}` }}>
@@ -101,6 +102,7 @@ export default function HomePage() {
                     display: "flex", flexDirection: "column", gap: 24,
                     animation: "fi .3s ease both"
                 }}>
+                    <Link to="/blog" style={{ fontSize: 18, fontWeight: 700, color: T.text, textDecoration: "none" }}>Blog</Link>
                     <Link to="/pricing" style={{ fontSize: 18, fontWeight: 700, color: T.text, textDecoration: "none" }}>Pricing</Link>
                     {user ? (
                         <Link to="/dashboard" style={{ fontSize: 18, fontWeight: 700, color: T.accent, textDecoration: "none" }}>Go to Dashboard</Link>
@@ -247,6 +249,7 @@ export default function HomePage() {
                             <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1 }}>Product</div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                                 <Link to="/pricing" style={{ fontSize: 14, color: T.textSec, textDecoration: "none" }}>Pricing</Link>
+                                <Link to="/blog" style={{ fontSize: 14, color: T.textSec, textDecoration: "none" }}>Blog</Link>
                                 <Link to="/login" style={{ fontSize: 14, color: T.textSec, textDecoration: "none" }}>Login</Link>
                                 <Link to="/signup" style={{ fontSize: 14, color: T.textSec, textDecoration: "none" }}>Sign Up</Link>
                             </div>

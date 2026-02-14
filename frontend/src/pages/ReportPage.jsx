@@ -220,7 +220,7 @@ export default function ReportPage() {
                         <span style={{ fontSize: 28, fontWeight: 800, color: T.bg, fontFamily: "'IBM Plex Mono',monospace" }}>SF</span>
                     </div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 8 }}>Analyzing {ticker}...</div>
-                    <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6 }}>Gemini is searching financial data, earnings reports,<br />and analyst estimates in real-time.</div>
+                    <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6 }}>Stock Fortress AI is searching financial data, earnings reports,<br />and analyst estimates in real-time.</div>
                     <div style={{ marginTop: 24, width: 180, height: 4, background: T.surface, borderRadius: 2, overflow: "hidden", margin: "24px auto 0" }}>
                         <div style={{ width: "60%", height: "100%", background: `linear-gradient(90deg,${T.accent},${T.blue})`, borderRadius: 2, animation: "shimmer 2s ease infinite", backgroundSize: "200% 100%" }} />
                     </div>
