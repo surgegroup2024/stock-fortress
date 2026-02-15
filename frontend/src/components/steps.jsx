@@ -644,16 +644,50 @@ export function S7({ d }) {
     </div>);
 }
 
+// Helper to get YouTube Embed URL
+function getEmbedUrl(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}` : null;
+}
+
 export function Gut({ d }) {
     const s = d.investor_gut_check;
     const qs = [s.question_1, s.question_2, s.question_3, s.question_4];
-    return (<div>
+    const video = s.video_analysis;
+    const embedUrl = video ? getEmbedUrl(video.url) : null;
+
+    return (<div style={{ paddingBottom: 100 }}>
         <Card delay={.1} style={{ background: `linear-gradient(135deg,${T.warn}06,${T.danger}06)`, border: `1px solid ${T.warn}28` }}>
             <div style={{ textAlign: "center", fontSize: 11, fontWeight: 700, color: T.warn, letterSpacing: 2.5, textTransform: "uppercase" }}>Honest Self-Assessment</div></Card>
+
         {qs.map((q, i) => (<Card key={i} delay={.12 * (i + 1)}>
             <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
                 <div style={{ width: 26, height: 26, borderRadius: 7, background: `${T.accent}18`, border: `1px solid ${T.accent}38`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 13, fontWeight: 700, color: T.accent, fontFamily: "'IBM Plex Mono',monospace" }}>{i + 1}</div>
                 <div style={{ fontSize: 13, color: T.text, lineHeight: 1.7, fontWeight: 500 }}>{q}</div></div></Card>))}
+
+        {video && embedUrl && (
+            <Card delay={.6} style={{ background: T.surface, border: `1px solid ${T.border}`, scrollMarginTop: 100 }}>
+                <SectionLabel color={T.blue}>📺 Recommended Watch</SectionLabel>
+                <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, borderRadius: 12, overflow: "hidden", marginBottom: 12, background: "#000" }}>
+                    <iframe
+                        src={embedUrl}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+                    />
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 4, lineHeight: 1.4 }}>{video.title}</div>
+                <div style={{ fontSize: 11, color: T.textDim, marginBottom: 8 }}>via {video.channel}</div>
+                <div style={{ fontSize: 12, color: T.textSec, lineHeight: 1.5, fontStyle: "italic", borderLeft: `2px solid ${T.blue}`, paddingLeft: 8 }}>
+                    "Why: {video.why_watch}"
+                </div>
+            </Card>
+        )}
+
         <Card delay={.7} style={{ background: `linear-gradient(135deg,${T.card},${T.accent}06)`, border: `1px solid ${T.accent}38` }}>
             <SectionLabel color={T.accent}>Remember</SectionLabel>
             <div style={{ fontSize: 14, color: T.text, lineHeight: 1.8, fontStyle: "italic" }}>"{s.mindset_reminder}"</div></Card>

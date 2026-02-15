@@ -13,13 +13,18 @@ import { supabase } from "../lib/supabase";
 const PLAN_LIMITS = { free: 3, pro: 30, premium: Infinity };
 const ANON_LIMIT = 1;
 
-function getAnonCount() {
+function getAnonState() {
     const key = `sf_anon_${new Date().getFullYear()}_${new Date().getMonth()}`;
-    return parseInt(localStorage.getItem(key) || "0", 10);
+    const used = parseInt(localStorage.getItem(key) || "0", 10);
+    const last = localStorage.getItem("sf_anon_last_ticker");
+    return { used, last };
 }
-function bumpAnonCount() {
+
+function bumpAnonState(ticker) {
     const key = `sf_anon_${new Date().getFullYear()}_${new Date().getMonth()}`;
-    localStorage.setItem(key, String(getAnonCount() + 1));
+    const { used } = getAnonState();
+    localStorage.setItem(key, String(used + 1));
+    localStorage.setItem("sf_anon_last_ticker", ticker);
 }
 
 // ─── PAYWALL COMPONENT ───
@@ -131,9 +136,13 @@ export default function ReportPage() {
                 }
             } else {
                 // Anonymous user — localStorage counter
-                const used = getAnonCount();
+                const { used, last } = getAnonState();
                 if (!cancelled) setUsageInfo({ used, limit: ANON_LIMIT });
-                if (used >= ANON_LIMIT) {
+
+                // Allow re-viewing the LAST ticker they spent a credit on
+                const isRevisit = last === ticker;
+
+                if (used >= ANON_LIMIT && !isRevisit) {
                     if (!cancelled) { setPaywalled(true); setLoading(false); }
                     return;
                 }
@@ -170,8 +179,11 @@ export default function ReportPage() {
                     }
 
                     // Bump anonymous counter
-                    if (!user && !json.cached) {
-                        bumpAnonCount();
+                    if (!user) {
+                        const { last } = getAnonState();
+                        if (last !== ticker) {
+                            bumpAnonState(ticker);
+                        }
                     }
                 }
             } catch {
