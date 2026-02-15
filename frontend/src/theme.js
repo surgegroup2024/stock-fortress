@@ -51,4 +51,18 @@ body { background:${T.bg}; overflow-x:hidden; }
 input::placeholder{color:${T.textDim}}
 .clickable { cursor: pointer; transition: transform 0.2s; }
 .clickable:active { transform: scale(0.95); }
+
+/* RESPONSIVE LAYOUT */
+.layout-container {
+    width: 100%;
+    margin: 0 auto;
+    max-width: 480px;
+    transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (min-width: 768px) {
+    .layout-container { max-width: 720px; }
+}
+@media (min-width: 1024px) {
+    .layout-container { max-width: 1024px; }
+}
 `;

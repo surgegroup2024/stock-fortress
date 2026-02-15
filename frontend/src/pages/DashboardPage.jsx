@@ -38,7 +38,7 @@ function ReportsTab({ user }) {
     }
 
     return (
-        <div style={{ display: "grid", gap: 12 }}>
+        <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
             {reports.map((r) => {
                 const d = r.report_data?.step_7_verdict;
                 const verdict = d?.action || "ANALYZED";
@@ -154,7 +154,7 @@ export default function DashboardPage() {
     if (loading || !user) return null;
 
     return (
-        <div style={{ maxWidth: 430, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column" }}>
+        <div className="layout-container" style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column" }}>
             <style>{CSS}</style>
             <Helmet><title>Dashboard — Stock Fortress</title></Helmet>
 

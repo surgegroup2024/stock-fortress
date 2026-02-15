@@ -24,7 +24,7 @@ function bumpAnonCount() {
 // ─── PAYWALL COMPONENT ───
 function Paywall({ user, used, limit, navigate }) {
     return (
-        <div style={{ maxWidth: 430, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+        <div className="layout-container" style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
             <style>{CSS}</style>
             <Helmet><title>Upgrade — Stock Fortress</title></Helmet>
             <div style={{ textAlign: "center", animation: "fi .5s ease both", maxWidth: 340 }}>
@@ -212,7 +212,7 @@ export default function ReportPage() {
 
     if (loading) {
         return (
-            <div style={{ maxWidth: 430, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+            <div className="layout-container" style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
                 <style>{CSS}</style>
                 <Helmet><title>{metaTitle}</title><meta name="description" content={metaDesc} /></Helmet>
                 <div style={{ animation: "fi .6s ease both", textAlign: "center" }}>
@@ -231,7 +231,7 @@ export default function ReportPage() {
 
     if (error && !data) {
         return (
-            <div style={{ maxWidth: 430, margin: "0 auto", minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+            <div className="layout-container" style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
                 <style>{CSS}</style>
                 <Helmet><title>Error — Stock Fortress</title></Helmet>
                 <div style={{ textAlign: "center", animation: "fi .5s ease both" }}>
@@ -246,7 +246,7 @@ export default function ReportPage() {
     const cur = STEPS[step];
 
     return (
-        <div style={{ maxWidth: 430, margin: "0 auto", height: "100dvh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+        <div className="layout-container" style={{ height: "100dvh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
             <style>{CSS}</style>
             <Helmet>
                 <title>{metaTitle}</title>

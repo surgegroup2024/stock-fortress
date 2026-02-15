@@ -30,43 +30,49 @@ router = APIRouter(prefix="/api/blog", tags=["blog"])
 
 
 # ─── BLOG GENERATION PROMPT ───
-BLOG_PROMPT = """You are a senior financial writer at Stock Fortress Research.
+BLOG_PROMPT = """You are a senior financial copywriter at Stock Fortress Research.
 
-Convert the following structured stock analysis JSON into a SHORT TEASER blog article.
-This is a PREVIEW — NOT the full analysis. The goal is to hook readers and drive them to sign up for the full 7-step institutional report.
+Your job: Write a SHORT TEASER that creates FOMO. The reader should feel they NEED the full report.
+
+GOLDEN RULE: Give them the STORY, not the DATA. Tease the conclusion, withhold the evidence.
 
 REQUIREMENTS:
-1. TITLE: Create a click-worthy but honest title. Examples:
+1. TITLE: Click-worthy but honest. Examples:
    - "NVDA Stock: Is the AI King Still Worth Buying at $890?"
-   - "HIMS: The $2B Telehealth Bet That Wall Street Is Sleeping On"
    - "TSLA Analysis: 3 Red Flags Every Investor Should Know"
 
-2. EXCERPT: Write a 140-160 character SEO meta description that hooks the reader.
+2. EXCERPT: 140-160 character SEO meta description.
 
-3. ARTICLE (300-450 words ONLY, markdown format):
-   - **Opening Hook** (2-3 sentences): Lead with the most compelling finding
-   - **Company Snapshot**: 2-3 sentences on what they do and why now
-   - **Key Highlights**: 3-4 bullet points with HIGH-LEVEL metrics only (revenue trend, growth %, verdict). Do NOT include exact EPS, DCF, detailed balance sheet, or risk matrix.
-   - **Our Verdict**: State the verdict (BUY/WATCH/AVOID) with ONE sentence of reasoning
-   - **End with**: "Want the full 7-step institutional analysis — including detailed financials, risk assessment, valuation model, and earnings deep-dive? Run your own Stock Fortress report."
+3. ARTICLE (200-300 words MAX, markdown format):
+   - **Opening Hook** (2-3 sentences): Lead with the most provocative finding. Use emotion, not numbers.
+   - **The Setup** (2-3 sentences): What the company does and why NOW matters.
+   - **The Tease** (3-4 bullet points): Use QUALITATIVE language only. Examples:
+     ✅ "Revenue growth is accelerating — but one segment is dragging"
+     ✅ "Margins are expanding faster than Wall Street expected"
+     ✅ "The balance sheet tells a different story than the headlines"
+     ❌ "Revenue was $24.9B, beating estimates by 0.6%" ← NEVER DO THIS
+     ❌ "P/E of 379x, Forward P/E of 223x" ← NEVER DO THIS
+   - **Our Verdict**: State BUY/WATCH/AVOID with ONE vague sentence. Do NOT explain why in detail.
+   - **CTA**: "Want the full picture? Run your own Stock Fortress report."
 
-   CRITICAL — DO NOT INCLUDE:
-   - Detailed financial tables or exact EPS/revenue numbers
-   - DCF valuation or price targets
-   - Risk matrix or detailed competitive analysis
-   - Earnings guidance specifics
-   - Balance sheet details
-   These are PREMIUM content reserved for the full report.
+HARD RULES — VIOLATING THESE IS A FAILURE:
+- ABSOLUTELY NO markdown tables (no | pipes)
+- NO exact dollar amounts, percentages, P/E ratios, EPS, margins, or revenue figures
+- NO financial snapshots or metric grids
+- NO price targets or DCF values
+- NO balance sheet numbers
+- Keep it UNDER 300 words. Shorter is better.
+- Write like a movie trailer: show the genre, hide the plot twist
 
-4. TONE: Authoritative but accessible. Tease insights without giving away the full picture.
+4. TONE: Confident, slightly mysterious. Make them curious, not informed.
 
-5. TAGS: Generate 3-5 relevant tags (e.g., ["NVDA", "Technology", "AI Stocks", "Large Cap"])
+5. TAGS: 3-5 relevant tags.
 
 Return ONLY valid JSON (no markdown fences, no preamble):
 {
   "title": "...",
   "excerpt": "...",
-  "content": "... (short teaser markdown) ...",
+  "content": "... (short narrative teaser, NO tables, NO exact numbers) ...",
   "tags": ["...", "..."]
 }"""
 
@@ -111,6 +117,18 @@ async def generate_blog_post(ticker: str, report_data: dict, report_id: str = No
         )
 
         blog_data = json.loads(text)
+
+        # ── SAFETY NET: Strip leaked financial data ──
+        content = blog_data.get("content", "")
+        # Remove markdown tables (lines with | pipes)
+        content = "\n".join(
+            line for line in content.split("\n")
+            if not (line.strip().startswith("|") and line.strip().endswith("|"))
+        )
+        # Remove lines that are purely table separators
+        content = re.sub(r'\n\s*\|[\s:\-|]+\|\s*\n', '\n', content)
+        blog_data["content"] = content.strip()
+
     except Exception as e:
         print(f"❌ Blog generation failed for {ticker}: {e}")
         return None

@@ -12,6 +12,8 @@ const PricingPage = lazy(() => import("./pages/PricingPage"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const BlogListPage = lazy(() => import("./pages/BlogListPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 
 const Loading = () => (
     <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif" }}>
@@ -45,6 +47,8 @@ export default function App() {
                             <Route path="/pricing" element={<PricingPage />} />
                             <Route path="/blog" element={<BlogListPage />} />
                             <Route path="/blog/:slug" element={<BlogPostPage />} />
+                            <Route path="/terms" element={<TermsPage />} />
+                            <Route path="/privacy" element={<PrivacyPage />} />
                             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                         </Routes>
                     </Suspense>

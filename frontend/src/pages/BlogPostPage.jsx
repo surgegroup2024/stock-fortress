@@ -235,9 +235,13 @@ export default function BlogPostPage() {
                 {/* Divider */}
                 <div style={{ height: 1, background: T.border, marginBottom: 32 }} />
 
-                {/* Teaser Content */}
+                {/* Teaser Content — truncated to ~150 words */}
                 <div style={{ animation: "fi .6s ease .1s both" }}>
-                    {renderMarkdown(post.content)}
+                    {renderMarkdown((() => {
+                        const words = (post.content || "").split(/\s+/);
+                        if (words.length <= 150) return post.content;
+                        return words.slice(0, 150).join(" ") + "...";
+                    })())}
                 </div>
 
                 {/* ── PREMIUM CONTENT GATE ── */}
