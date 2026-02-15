@@ -235,18 +235,90 @@ export default function BlogPostPage() {
                 {/* Divider */}
                 <div style={{ height: 1, background: T.border, marginBottom: 32 }} />
 
-                {/* Content */}
+                {/* Teaser Content */}
                 <div style={{ animation: "fi .6s ease .1s both" }}>
                     {renderMarkdown(post.content)}
                 </div>
 
+                {/* ── PREMIUM CONTENT GATE ── */}
+                <div style={{ position: "relative", marginTop: 8 }}>
+                    {/* Blurred/Faded placeholder text */}
+                    <div style={{
+                        filter: "blur(5px)", WebkitFilter: "blur(5px)", userSelect: "none", pointerEvents: "none",
+                        color: T.textDim, fontSize: 14, lineHeight: 1.8, padding: "20px 0"
+                    }}>
+                        <p>Detailed financial analysis reveals that the company's revenue growth trajectory has maintained strong momentum with key metrics indicating...</p>
+                        <p>The DCF valuation model suggests a fair value range between $XXX and $XXX based on conservative growth assumptions and a WACC of...</p>
+                        <p>Risk assessment scoring indicates moderate volatility with primary risks concentrated in competitive positioning and regulatory changes...</p>
+                        <p>Earnings guidance for the upcoming quarter suggests management confidence with revenue expected to reach...</p>
+                    </div>
+
+                    {/* Gradient Overlay */}
+                    <div style={{
+                        position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                        background: `linear-gradient(180deg, ${T.bg}00 0%, ${T.bg}CC 25%, ${T.bg} 50%)`,
+                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
+                        paddingBottom: 20
+                    }} />
+                </div>
+
+                {/* Unlock CTA Box */}
+                <div style={{
+                    marginTop: 0, padding: "36px 28px", borderRadius: 18,
+                    background: "linear-gradient(135deg, #0F172A, #1E293B)",
+                    border: `1px solid ${T.accent}30`, textAlign: "center",
+                    position: "relative", zIndex: 2
+                }}>
+                    <div style={{
+                        width: 56, height: 56, borderRadius: 14,
+                        background: `linear-gradient(135deg,${T.accent},#00C49A)`,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16
+                    }}>
+                        <span style={{ fontSize: 24 }}>🔓</span>
+                    </div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: "#FFF", marginBottom: 8 }}>
+                        Unlock the Full Report
+                    </div>
+                    <div style={{ fontSize: 14, color: "#94A3B8", marginBottom: 20, lineHeight: 1.6 }}>
+                        This article is a preview. Get the complete <strong style={{ color: "#FFF" }}>7-step institutional analysis</strong> including:
+                    </div>
+
+                    <div style={{
+                        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, maxWidth: 400, margin: "0 auto 24px",
+                        textAlign: "left"
+                    }}>
+                        {["📊 Detailed Financials", "🎯 Valuation Model", "⚠️ Risk Matrix", "💰 Earnings Deep-Dive",
+                            "📈 Technical Signals", "🏁 Actionable Verdict"].map((item, i) => (
+                                <div key={i} style={{ fontSize: 13, color: "#CBD5E1", display: "flex", alignItems: "center", gap: 6 }}>
+                                    {item}
+                                </div>
+                            ))}
+                    </div>
+
+                    <Link to={`/report/${post.ticker}`} style={{
+                        display: "inline-block", padding: "16px 36px", borderRadius: 14,
+                        background: `linear-gradient(135deg,${T.accent},#059669)`, color: "#FFF",
+                        fontSize: 16, fontWeight: 700, textDecoration: "none",
+                        boxShadow: `0 12px 35px -10px ${T.accent}60`,
+                        transition: "transform .2s ease, box-shadow .2s ease"
+                    }}
+                        onMouseEnter={e => { e.target.style.transform = "translateY(-2px)"; e.target.style.boxShadow = `0 16px 40px -8px ${T.accent}80`; }}
+                        onMouseLeave={e => { e.target.style.transform = "translateY(0)"; e.target.style.boxShadow = `0 12px 35px -10px ${T.accent}60`; }}
+                    >
+                        Analyze {post.ticker} — Full Report →
+                    </Link>
+                    <div style={{ fontSize: 12, color: "#64748B", marginTop: 12 }}>
+                        Free preview • Sign up for unlimited reports
+                    </div>
+                </div>
+
                 {/* Disclaimer */}
                 <div style={{
-                    marginTop: 40, padding: 20, borderRadius: 12, background: `${T.warn}08`,
+                    marginTop: 32, padding: 20, borderRadius: 12, background: `${T.warn}08`,
                     border: `1px solid ${T.warn}20`, fontSize: 12, color: T.textDim, lineHeight: 1.6
                 }}>
                     <strong style={{ color: T.warn }}>⚠️ Disclaimer:</strong> This article is AI-generated research and does not constitute financial advice.
-                    Always do your own due diligence before making investment decisions. Past performance does not guarantee future results.
+                    Always do your own due diligence before making investment decisions.
                 </div>
 
                 {/* Tags */}
@@ -261,8 +333,8 @@ export default function BlogPostPage() {
                     </div>
                 )}
 
-                {/* Share & CTA */}
-                <div style={{ marginTop: 40, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {/* Share */}
+                <div style={{ marginTop: 32, display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
                         target="_blank" rel="noopener noreferrer"
                         style={{
@@ -286,24 +358,6 @@ export default function BlogPostPage() {
                     }}>
                         {copied ? "✓ Copied!" : "🔗 Copy Link"}
                     </button>
-                </div>
-
-                {/* CTA */}
-                <div style={{
-                    marginTop: 48, padding: 32, borderRadius: 18,
-                    background: "linear-gradient(135deg, #0F172A, #1E293B)",
-                    border: `1px solid ${T.border}40`, textAlign: "center"
-                }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: "#FFF", marginBottom: 8 }}>Run Your Own Analysis</div>
-                    <div style={{ fontSize: 14, color: "#94A3B8", marginBottom: 20 }}>Get a full 7-step institutional-grade report on any stock.</div>
-                    <Link to={`/report/${post.ticker}`} style={{
-                        display: "inline-block", padding: "14px 32px", borderRadius: 12,
-                        background: `linear-gradient(135deg,${T.accent},#059669)`, color: "#FFF",
-                        fontSize: 15, fontWeight: 700, textDecoration: "none",
-                        boxShadow: `0 10px 30px -10px ${T.accent}60`
-                    }}>
-                        Analyze {post.ticker} Now →
-                    </Link>
                 </div>
             </article>
         </div>

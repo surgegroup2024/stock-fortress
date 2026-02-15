@@ -10,15 +10,13 @@ import re
 from datetime import datetime, date
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
-from google import genai
-from google.genai import types
+from ai_provider import ai_generate_blog
 
 # ── Supabase client (service role — bypasses RLS) ──
 from supabase import create_client
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
-GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 _supabase = None
 def _get_sb():
@@ -34,7 +32,8 @@ router = APIRouter(prefix="/api/blog", tags=["blog"])
 # ─── BLOG GENERATION PROMPT ───
 BLOG_PROMPT = """You are a senior financial writer at Stock Fortress Research.
 
-Convert the following structured stock analysis JSON into a compelling, Seeking Alpha-style blog article.
+Convert the following structured stock analysis JSON into a SHORT TEASER blog article.
+This is a PREVIEW — NOT the full analysis. The goal is to hook readers and drive them to sign up for the full 7-step institutional report.
 
 REQUIREMENTS:
 1. TITLE: Create a click-worthy but honest title. Examples:
@@ -44,16 +43,22 @@ REQUIREMENTS:
 
 2. EXCERPT: Write a 140-160 character SEO meta description that hooks the reader.
 
-3. ARTICLE (800-1200 words, markdown format):
-   - **Opening Hook** (2-3 sentences): Lead with the most interesting finding
-   - **Company Overview**: What they do, why it matters now
-   - **Financial Snapshot**: Key metrics in a scannable format
-   - **Bull vs Bear Case**: Present both sides fairly
-   - **Valuation Check**: Is it cheap or expensive vs peers?
-   - **The Verdict**: Clear BUY/WATCH/AVOID with reasoning
-   - **What to Watch Next**: Key upcoming catalysts
+3. ARTICLE (300-450 words ONLY, markdown format):
+   - **Opening Hook** (2-3 sentences): Lead with the most compelling finding
+   - **Company Snapshot**: 2-3 sentences on what they do and why now
+   - **Key Highlights**: 3-4 bullet points with HIGH-LEVEL metrics only (revenue trend, growth %, verdict). Do NOT include exact EPS, DCF, detailed balance sheet, or risk matrix.
+   - **Our Verdict**: State the verdict (BUY/WATCH/AVOID) with ONE sentence of reasoning
+   - **End with**: "Want the full 7-step institutional analysis — including detailed financials, risk assessment, valuation model, and earnings deep-dive? Run your own Stock Fortress report."
 
-4. TONE: Authoritative but accessible. No fluff. Data-driven. Write like capital is at risk.
+   CRITICAL — DO NOT INCLUDE:
+   - Detailed financial tables or exact EPS/revenue numbers
+   - DCF valuation or price targets
+   - Risk matrix or detailed competitive analysis
+   - Earnings guidance specifics
+   - Balance sheet details
+   These are PREMIUM content reserved for the full report.
+
+4. TONE: Authoritative but accessible. Tease insights without giving away the full picture.
 
 5. TAGS: Generate 3-5 relevant tags (e.g., ["NVDA", "Technology", "AI Stocks", "Large Cap"])
 
@@ -61,7 +66,7 @@ Return ONLY valid JSON (no markdown fences, no preamble):
 {
   "title": "...",
   "excerpt": "...",
-  "content": "... (full markdown article) ...",
+  "content": "... (short teaser markdown) ...",
   "tags": ["...", "..."]
 }"""
 
@@ -85,10 +90,6 @@ async def generate_blog_post(ticker: str, report_data: dict, report_id: str = No
         print("⚠️ Blog: Supabase not configured, skipping")
         return None
 
-    if not GEMINI_KEY:
-        print("⚠️ Blog: Gemini not configured, skipping")
-        return None
-
     # ── DUPLICATE CHECK ──
     today_str = date.today().isoformat()
     existing = sb.table("blog_posts") \
@@ -104,21 +105,10 @@ async def generate_blog_post(ticker: str, report_data: dict, report_id: str = No
 
     # ── GENERATE ARTICLE ──
     try:
-        client = genai.Client(api_key=GEMINI_KEY)
-        config = types.GenerateContentConfig(
-            system_instruction=BLOG_PROMPT,
-            temperature=0.6,
+        text = await ai_generate_blog(
+            system_prompt=BLOG_PROMPT,
+            user_prompt=f"Generate a blog article for ticker {ticker}. Here is the analysis data:\n\n{json.dumps(report_data, indent=2)}",
         )
-
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=f"Generate a blog article for ticker {ticker}. Here is the analysis data:\n\n{json.dumps(report_data, indent=2)}",
-            config=config,
-        )
-
-        text = response.text.strip()
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
 
         blog_data = json.loads(text)
     except Exception as e:

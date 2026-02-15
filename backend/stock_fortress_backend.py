@@ -34,8 +34,9 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from google import genai
-from google.genai import types
+
+# AI Provider (configurable: gemini, openai, anthropic, perplexity)
+from ai_provider import ai_generate, AI_PROVIDER, AI_MODEL
 
 # ─── CONFIG ───
 GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
@@ -252,24 +253,9 @@ Return ONLY valid JSON (no markdown, no preamble, no extra text) with this exact
 
 
 async def generate_report(ticker: str) -> dict:
-    """Send ticker to Gemini with Google Search grounding to get structured analysis"""
-    client = genai.Client(api_key=GEMINI_KEY)
+    """Send ticker to AI provider to get structured analysis."""
 
-    # For Gemini 3 / 2.5 Preview Models
-    grounding_tool = types.Tool(
-        google_search=types.GoogleSearch()
-    )
-
-    config = types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
-        tools=[grounding_tool],
-        temperature=0.4,
-    )
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=f"""Generate a Stock Fortress 7-Step Pre-Trade Research Report for {ticker}.
+    user_prompt = f"""Generate a Stock Fortress 7-Step Pre-Trade Research Report for {ticker}.
 
 SEARCH REQUIREMENTS:
 1. Current stock price, market cap, P/E ratio, and key metrics.
@@ -280,17 +266,18 @@ SEARCH REQUIREMENTS:
 6. Analyst estimates and price targets.
 7. Regulatory, legal, or concentration risks.
 
-Return ONLY the JSON structure specified in the system prompt. No markdown fences, no preamble.""",
-            config=config,
+Return ONLY the JSON structure specified in the system prompt. No markdown fences, no preamble."""
+
+    try:
+        # use_grounding=True enables Google Search when provider is Gemini
+        full_text = await ai_generate(
+            system_prompt=SYSTEM_PROMPT,
+            user_prompt=user_prompt,
+            use_grounding=True,
         )
     except Exception as e:
-        print(f"\n[GEMINI API ERROR]: {str(e)}\n")
+        print(f"\n[AI API ERROR]: {str(e)}\n")
         raise e
-
-    # Extract and parse JSON from response
-    full_text = response.text.strip()
-    if full_text.startswith("```"):
-        full_text = full_text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
 
     return json.loads(full_text)
 
@@ -322,6 +309,9 @@ async def get_report(ticker: str):
     cache_key = f"report:{ticker}"
     cached = get_cache(cache_key)
     if cached:
+        # Auto-generate blog post in background (even if cached)
+        if generate_blog_post:
+            asyncio.create_task(generate_blog_post(ticker, cached))
         return {"ticker": ticker, "cached": True, "report": cached}
 
     # Generate Gemini analysis (with Google Search grounding)
