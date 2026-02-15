@@ -5,7 +5,7 @@ import { Badge, Card, MetricRow, Flags, SectionLabel } from "./atoms";
 
 // ─── STEP VIEWS ───
 
-const SmartText = ({ text }) => {
+export const SmartText = ({ text }) => {
     if (!text) return null;
     // Regex matches: Money, Percent, "up/down X%", Sentiment words, YoY/QX, AI terms, Growth/Risk words
     const regex = /(\$[\d\.,]+(?:\s?[BM]illion)?|\d+(?:\.\d+)?%|YoY|Q[1-4]|FY\d{4}|202[4-9]|bullish|bearish|outperform|underperform|up\s+\d+(?:%|bps)|down\s+\d+(?:%|bps)|AI|GenAI|Gemini|GPT|LLM|growth|growing|record|strong|robust|beat|surge|soar|decline|drop|weak|miss|headwind|risk|uncertainty|iPhone|Mac|iPad|Services|Wearables|Vision\s?Pro)/gi;
@@ -48,7 +48,7 @@ const SmartText = ({ text }) => {
 
 
 
-const AnalystConsensus = ({ text }) => {
+export const AnalystConsensus = ({ text }) => {
     if (!text) return null;
 
     // Extract consensus: "Consensus is 'Moderate Buy'" or similar
@@ -100,7 +100,7 @@ const AnalystConsensus = ({ text }) => {
     );
 };
 
-const PeerComparison = ({ text }) => {
+export const PeerComparison = ({ text }) => {
     if (!text) return null;
     // Extract matches: "Microsoft 25.1", "Alphabet 28.9"
     const matches = [...text.matchAll(/([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s*:?\s*(\d{1,3}\.\d)/g)];
@@ -129,7 +129,7 @@ const PeerComparison = ({ text }) => {
 };
 
 // Helper for extracting main number from string "32.36 (Price...)"
-const BigMetric = ({ label, raw, hl }) => {
+export const BigMetric = ({ label, raw, hl }) => {
     const num = raw?.match(/^([\d\.]+)/)?.[1] || "—";
     const sub = raw?.replace(num, "").replace(/^\s*\(|\)\s*$/g, "") || "";
     return (
@@ -142,7 +142,7 @@ const BigMetric = ({ label, raw, hl }) => {
 
 };
 
-const ContextBadge = ({ text }) => {
+export const ContextBadge = ({ text }) => {
     if (!text) return null;
     const match = text.match(/(upside|downside|overvalued|undervalued)\s*(?:of|by)?\s*~?(\d+%?)/i);
     if (!match) return null;
@@ -160,7 +160,7 @@ const ContextBadge = ({ text }) => {
     )
 };
 
-const SentimentRow = ({ text }) => {
+export const SentimentRow = ({ text }) => {
     if (!text) return null;
     const lower = text.toLowerCase();
     const isPos = lower.match(/(growth|grow|driven by|led by|record|strong|solid|increase|up\s)/);
@@ -180,7 +180,7 @@ const SentimentRow = ({ text }) => {
 
 
 
-const DCFCard = ({ text }) => {
+export const DCFCard = ({ text }) => {
     if (!text) return null;
     // Extract Implied Price/Value (Robust + Suffix)
     const priceMatch = text.match(/(?:Implied Share Price|Intrinsic Value|Fair Value|Implied Value).*?\$([\d\.,]+)\s*([MBT]r?illion|[MBT])?/i);
@@ -340,7 +340,7 @@ export function S1({ d, onNext }) {
     </div>);
 }
 
-function RevenueBreakdown({ items }) {
+export function RevenueBreakdown({ items }) {
     if (!items || !items.length) return null;
     const colors = [T.accent, T.blue, T.warn, T.danger, T.text];
     // Handle string case (legacy reports)
@@ -373,7 +373,7 @@ function RevenueBreakdown({ items }) {
     );
 }
 
-function FinancialGrid({ s }) {
+export function FinancialGrid({ s }) {
     const parseNum = (str) => {
         if (!str) return 0;
         const match = str.match(/(-?[\d\.]+)/);

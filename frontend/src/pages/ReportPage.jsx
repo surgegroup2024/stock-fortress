@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { T, STEPS, TOTAL_STEPS, CSS } from "../theme";
 import { NavBtn } from "../components/atoms";
 import { Landing, S1, S2, S2A, S3, S4, S5, S6, S7, Gut } from "../components/steps";
+import AnalysisSnapshot from "../components/AnalysisSnapshot";
 import { DEMOS } from "../data/demos";
 import { useAuth } from "../components/AuthProvider";
 import { supabase } from "../lib/supabase";
@@ -80,6 +81,7 @@ export default function ReportPage() {
     const [watched, setWatched] = useState(false);
     const [saving, setSaving] = useState(false);
     const [paywalled, setPaywalled] = useState(false);
+    const [viewMode, setViewMode] = useState("steps"); // steps, snapshot
     const [usageInfo, setUsageInfo] = useState({ used: 0, limit: 3 });
     const ref = useRef(null);
     const ticker = (paramTicker || "").toUpperCase().trim();
@@ -146,7 +148,6 @@ export default function ReportPage() {
                     setData(json.report);
                     setStep(0);
 
-                    // Auto-save for logged-in users
                     if (user && !json.cached) {
                         supabase.from("reports").insert({
                             user_id: user.id,
@@ -162,7 +163,10 @@ export default function ReportPage() {
                             .eq("user_id", user.id)
                             .eq("ticker", ticker)
                             .limit(1);
-                        if (existing?.length) setSaved(true);
+                        if (existing?.length) {
+                            setSaved(true);
+                            setViewMode("snapshot");
+                        }
                     }
 
                     // Bump anonymous counter
@@ -283,7 +287,7 @@ export default function ReportPage() {
                         </button>
                     </div>
                 </div>
-                {step > 0 && (<div>
+                {viewMode === "steps" && step > 0 && (<div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                             <span style={{ fontSize: 14 }}>{cur.i}</span>
@@ -297,14 +301,20 @@ export default function ReportPage() {
             {/* CONTENT */}
             <div ref={ref} style={{ flex: 1, overflowY: "auto", padding: "14px 14px 96px 14px" }} key={step}>
                 {error && <div style={{ padding: "8px 12px", borderRadius: 8, background: `${T.warn}18`, border: `1px solid ${T.warn}40`, fontSize: 11, color: T.warn, textAlign: "center", marginBottom: 10 }}>{error}</div>}
-                {VIEWS[cur.k]}
+                {viewMode === "snapshot" ? (
+                    <AnalysisSnapshot data={data} onViewFull={() => { setViewMode("steps"); setStep(1); }} />
+                ) : (
+                    VIEWS[cur.k]
+                )}
             </div>
 
             {/* NAV */}
-            {step > 0 && (<div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "10px 14px", background: `linear-gradient(transparent, ${T.bg} 20%)`, paddingTop: 28, display: "flex", gap: 10, zIndex: 10 }}>
-                <NavBtn onClick={prev}>← Back</NavBtn>
-                {step < STEPS.length - 1 ? <NavBtn onClick={next} primary>Next Step →</NavBtn> : <NavBtn onClick={() => navigate("/")} primary>New Research</NavBtn>}
-            </div>)}
-        </div>
+            {
+                viewMode === "steps" && step > 0 && (<div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "10px 14px", background: `linear-gradient(transparent, ${T.bg} 20%)`, paddingTop: 28, display: "flex", gap: 10, zIndex: 10 }}>
+                    <NavBtn onClick={prev}>← Back</NavBtn>
+                    {step < STEPS.length - 1 ? <NavBtn onClick={next} primary>Next Step →</NavBtn> : <NavBtn onClick={() => navigate("/")} primary>New Research</NavBtn>}
+                </div>)
+            }
+        </div >
     );
 }
