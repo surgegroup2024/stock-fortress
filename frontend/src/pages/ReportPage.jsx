@@ -77,7 +77,7 @@ function Paywall({ user, used, limit, navigate }) {
 export default function ReportPage() {
     const { ticker: paramTicker } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, subscription } = useAuth();
     const [step, setStep] = useState(0);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -118,17 +118,23 @@ export default function ReportPage() {
 
             // ── CHECK RATE LIMIT ──
             if (user) {
-                const plan = "free"; // TODO: read from profiles table when Stripe is wired
-                const limit = PLAN_LIMITS[plan] || 3;
-                const startOfMonth = new Date();
-                startOfMonth.setDate(1);
-                startOfMonth.setHours(0, 0, 0, 0);
+                const plan = subscription?.plan_name || "free";
+                const limit = subscription?.reports_limit || PLAN_LIMITS[plan] || 3;
+
+                // Use monthly cycle from subscription if available, else calc from 1st
+                let startPeriod = new Date();
+                if (subscription?.current_period_start) {
+                    startPeriod = new Date(subscription.current_period_start);
+                } else {
+                    startPeriod.setDate(1);
+                    startPeriod.setHours(0, 0, 0, 0);
+                }
 
                 const { count } = await supabase
                     .from("reports")
                     .select("id", { count: "exact", head: true })
                     .eq("user_id", user.id)
-                    .gte("generated_at", startOfMonth.toISOString());
+                    .gte("generated_at", startPeriod.toISOString());
 
                 const used = count || 0;
                 if (!cancelled) setUsageInfo({ used, limit });
@@ -211,7 +217,7 @@ export default function ReportPage() {
         };
         load();
         return () => { cancelled = true; };
-    }, [ticker, navigate, user]);
+    }, [ticker, navigate, user, subscription]);
 
     useEffect(() => { ref.current?.scrollTo({ top: 0, behavior: "smooth" }) }, [step]);
 

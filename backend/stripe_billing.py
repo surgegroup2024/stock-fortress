@@ -119,9 +119,9 @@ async def upsert_subscription_from_session(session):
         "billing_cycle": billing_cycle,
         "status": "active",
         "reports_limit": PLAN_REPORTS.get(plan, 3),
-        "current_period_start": datetime.fromtimestamp(subscription.current_period_start).isoformat(),
-        "current_period_end": datetime.fromtimestamp(subscription.current_period_end).isoformat(),
-        "cancel_at_period_end": False,
+        "current_period_start": datetime.fromtimestamp(subscription.get("current_period_start") or int(datetime.now().timestamp())).isoformat(),
+        "current_period_end": datetime.fromtimestamp(subscription.get("current_period_end") or int(datetime.now().timestamp())).isoformat(),
+        "cancel_at_period_end": subscription.get("cancel_at_period_end", False),
     }, on_conflict="user_id").execute()
 
 

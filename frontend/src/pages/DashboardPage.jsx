@@ -63,34 +63,32 @@ function WatchlistTab({ user }) {
     return <Watchlist user={user} />;
 }
 
+
 function SettingsTab({ user, signOut }) {
+    const { subscription } = useAuth();
     const [used, setUsed] = useState(0);
-    const [sub, setSub] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch subscription
-        supabase
-            .from("subscriptions")
-            .select("*")
-            .eq("user_id", user.id)
-            .maybeSingle()
-            .then(({ data }) => setSub(data));
-
         // Count reports this month
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
+        const startPeriod = new Date();
+        if (subscription?.current_period_start) {
+            startPeriod.setTime(new Date(subscription.current_period_start).getTime());
+        } else {
+            startPeriod.setDate(1);
+            startPeriod.setHours(0, 0, 0, 0);
+        }
+
         supabase
             .from("reports")
             .select("id", { count: "exact", head: true })
             .eq("user_id", user.id)
-            .gte("generated_at", startOfMonth.toISOString())
+            .gte("generated_at", startPeriod.toISOString())
             .then(({ count }) => setUsed(count || 0));
-    }, [user]);
+    }, [user, subscription]);
 
-    const plan = sub?.plan_name || "free";
-    const limit = sub?.reports_limit || 3;
+    const plan = subscription?.plan_name || "free";
+    const limit = subscription?.reports_limit || 3;
     const isUnlimited = limit > 1000;
     const pct = isUnlimited ? 0 : Math.min((used / limit) * 100, 100);
     const barColor = pct >= 100 ? T.danger : pct >= 66 ? T.warn : T.accent;
@@ -104,9 +102,9 @@ function SettingsTab({ user, signOut }) {
                 <div style={{ fontSize: 13, color: T.textSec, marginBottom: 12 }}>{user.email}</div>
                 <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
                     <Badge color={planColor}>{planLabel}</Badge>
-                    {sub?.cancel_at_period_end && <Badge color={T.warn}>Cancels at period end</Badge>}
+                    {subscription?.cancel_at_period_end && <Badge color={T.warn}>Cancels at period end</Badge>}
                 </div>
-                <div style={{ fontSize: 12, color: T.textSec, marginBottom: 6 }}>Reports this month</div>
+                <div style={{ fontSize: 12, color: T.textSec, marginBottom: 6 }}>Reports this period</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ flex: 1, height: 6, background: T.surface, borderRadius: 3, overflow: "hidden" }}>
                         <div style={{ width: isUnlimited ? "100%" : `${pct}%`, height: "100%", background: isUnlimited ? T.accent : barColor, borderRadius: 3, transition: "width .4s ease" }} />
@@ -138,6 +136,16 @@ function SettingsTab({ user, signOut }) {
             <div style={{ marginTop: 12 }}>
                 <button onClick={signOut} style={{ width: "100%", padding: "12px", borderRadius: 10, border: `1px solid ${T.border}`, background: T.surface, color: T.text, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Log Out</button>
             </div>
+
+            <div style={{ marginTop: 24, padding: "16px", background: T.card, borderRadius: 12, border: `1px solid ${T.border}` }}>
+                <h4 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: "0 0 8px 0" }}>Manage Subscription</h4>
+                <p style={{ fontSize: 13, color: T.textSec, margin: "0 0 12px 0" }}>
+                    Need to change your plan or update payment details?
+                </p>
+                <div style={{ fontSize: 13, color: T.textDim }}>
+                    Customer portal coming soon. Contact support@stockfortress.com for assistance.
+                </div>
+            </div>
         </div>
     );
 }
@@ -146,12 +154,52 @@ export default function DashboardPage() {
     const { user, loading, signOut } = useAuth();
     const navigate = useNavigate();
     const [tab, setTab] = useState("reports"); // reports, watchlist, settings
+    const [syncing, setSyncing] = useState(false);
 
     useEffect(() => {
         if (!loading && !user) navigate("/login");
     }, [user, loading, navigate]);
 
+    // Handle Stripe Success
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search);
+        const success = query.get("stripe_success");
+        const sessionId = query.get("session_id");
+
+        if (success && sessionId && !syncing) {
+            setSyncing(true);
+            // Call sync endpoint
+            fetch("/api/billing/sync-checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId })
+            })
+                .then(res => res.json())
+                .then(() => {
+                    // Clear URL params
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    // Reload to refresh auth/subscription state
+                    window.location.reload();
+                })
+                .catch(err => {
+                    console.error("Sync failed", err);
+                    setSyncing(false);
+                    alert("Subscription sync failed. Please contact support.");
+                });
+        }
+    }, [syncing]);
+
     if (loading || !user) return null;
+
+    if (syncing) {
+        return (
+            <div className="layout-container" style={{ minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif" }}>
+                <div style={{ fontSize: 40, marginBottom: 20, animation: "spin 1s linear infinite" }}>🔄</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: T.text }}>Finalizing your upgrade...</div>
+                <div style={{ fontSize: 14, color: T.textDim, marginTop: 8 }}>Please wait a moment while we confirm your payment.</div>
+            </div>
+        );
+    }
 
     return (
         <div className="layout-container" style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column" }}>

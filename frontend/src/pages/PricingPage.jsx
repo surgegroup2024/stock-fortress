@@ -5,9 +5,11 @@ import { useBilling } from "../billing";
 import ROICalculator from "./ROICalculator";
 
 export default function PricingPage() {
-    const { user } = useAuth();
+    const { user, subscription } = useAuth();
     const { handleSelectPlan, isProcessing } = useBilling({ user });
     const navigate = useNavigate();
+
+    const currentPlan = (subscription?.plan_name || "free").toLowerCase();
 
     const plans = [
         {
@@ -16,10 +18,11 @@ export default function PricingPage() {
             period: "/mo",
             desc: "For getting started",
             features: ["3 AI reports/month", "7-step analysis", "Watchlist", "Data caching"],
-            btn_text: "Current Plan",
+            btn_text: currentPlan === "free" ? "Current Plan" : "Downgrade",
             action: () => handleSelectPlan({ name: "Free", isFree: true }),
             color: T.textSec,
-            bg: T.surface
+            bg: T.surface,
+            disabled: currentPlan === "free"
         },
         {
             name: "Pro",
@@ -27,11 +30,12 @@ export default function PricingPage() {
             period: "/mo",
             desc: "For active investors",
             features: ["30 AI reports/month", "Everything in Free", "Priority generation", "Email alerts", "Export PDF"],
-            btn_text: "Upgrade to Pro",
+            btn_text: currentPlan === "pro" ? "Current Plan" : (currentPlan === "premium" ? "Downgrade" : "Upgrade to Pro"),
             action: () => handleSelectPlan({ name: "Pro" }),
             color: T.accent,
             bg: `${T.accent}15`,
-            border: T.accent
+            border: T.accent,
+            disabled: currentPlan === "pro"
         },
         {
             name: "Premium",
@@ -39,11 +43,12 @@ export default function PricingPage() {
             period: "/mo",
             desc: "For power users",
             features: ["Unlimited reports", "Everything in Pro", "Bulk analysis", "API access (beta)", "Priority support"],
-            btn_text: "Go Unlimited",
+            btn_text: currentPlan === "premium" ? "Current Plan" : "Go Unlimited",
             action: () => handleSelectPlan({ name: "Premium" }),
             color: T.blue,
             bg: `${T.blue}15`,
-            border: T.blue
+            border: T.blue,
+            disabled: currentPlan === "premium"
         }
     ];
 
@@ -100,7 +105,7 @@ export default function PricingPage() {
 
                             <button
                                 onClick={p.action}
-                                disabled={isProcessing}
+                                disabled={isProcessing || p.disabled}
                                 style={{
                                     width: "100%",
                                     padding: "16px",

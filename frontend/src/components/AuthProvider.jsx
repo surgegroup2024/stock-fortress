@@ -6,6 +6,7 @@ const AuthContext = createContext({});
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [session, setSession] = useState(null);
+    const [subscription, setSubscription] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -13,18 +14,34 @@ export function AuthProvider({ children }) {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
-            setLoading(false);
+            if (session?.user) fetchSubscription(session.user.id);
+            else setLoading(false);
         });
 
         // 2. Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
-            setLoading(false);
+            if (session?.user) fetchSubscription(session.user.id);
+            else {
+                setSubscription(null);
+                setLoading(false);
+            }
         });
 
         return () => subscription.unsubscribe();
     }, []);
+
+    const fetchSubscription = async (userId) => {
+        const { data } = await supabase
+            .from("subscriptions")
+            .select("*")
+            .eq("user_id", userId)
+            .single();
+
+        if (data) setSubscription(data);
+        setLoading(false);
+    };
 
     const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password });
     const signUp = (email, password, name) => supabase.auth.signUp({
@@ -35,7 +52,7 @@ export function AuthProvider({ children }) {
     const signOut = () => supabase.auth.signOut();
 
     return (
-        <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+        <AuthContext.Provider value={{ user, session, subscription, loading, signIn, signUp, signOut }}>
             {children}
         </AuthContext.Provider>
     );
