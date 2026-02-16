@@ -144,7 +144,20 @@ async def create_checkout(req: CheckoutRequest):
     customer_id = None
     if existing.data and existing.data[0].get("stripe_customer_id"):
         customer_id = existing.data[0]["stripe_customer_id"]
-        customer = stripe.Customer.retrieve(customer_id)
+        try:
+            customer = stripe.Customer.retrieve(customer_id)
+            if hasattr(customer, "deleted") and customer.deleted:
+                raise stripe.error.InvalidRequestError("Customer deleted", "id")
+        except stripe.error.InvalidRequestError:
+            # Customer ID exists in DB but not in Stripe (or deleted) -> Create new one
+            print(f"⚠️ Configure customer {customer_id} missing in Stripe. Creating new one.")
+            customer = stripe.Customer.create(
+                email=req.email,
+                metadata={"supabase_user_id": req.userId}
+            )
+            customer_id = customer.id
+            # Update DB with new customer ID
+            supabase.table("subscriptions").update({"stripe_customer_id": customer_id}).eq("user_id", req.userId).execute()
     else:
         customer = stripe.Customer.create(
             email=req.email,
