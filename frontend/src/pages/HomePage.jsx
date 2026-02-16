@@ -82,7 +82,7 @@ export default function HomePage() {
                         </Link>
                     ) : (
                         <>
-                            <Link to="/login" style={{ color: T.textSec, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>Login</Link>
+                            <Link to="/login" style={{ color: "#FFF", fontSize: 14, fontWeight: 600, textDecoration: "none" }}>Login</Link>
                             <Link to="/signup" style={{ padding: "10px 20px", borderRadius: 10, background: T.text, color: T.bg, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>Sign Up</Link>
                         </>
                     )}

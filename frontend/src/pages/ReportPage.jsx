@@ -100,7 +100,10 @@ export default function ReportPage() {
             ticker,
             last_verdict: verdict,
         }, { onConflict: "user_id,ticker" });
-        if (!error) setWatched(true);
+        if (!error) {
+            setWatched(true);
+            if (window.posthog) window.posthog.capture('watchlist_add', { ticker, verdict });
+        }
         else alert("Watchlist failed: " + error.message);
         setSaving(false);
     };
@@ -131,7 +134,11 @@ export default function ReportPage() {
                 if (!cancelled) setUsageInfo({ used, limit });
 
                 if (used >= limit) {
-                    if (!cancelled) { setPaywalled(true); setLoading(false); }
+                    if (!cancelled) {
+                        setPaywalled(true);
+                        setLoading(false);
+                        if (window.posthog) window.posthog.capture('paywall_shown', { used, limit });
+                    }
                     return;
                 }
             } else {
@@ -156,6 +163,11 @@ export default function ReportPage() {
                 if (!cancelled) {
                     setData(json.report);
                     setStep(0);
+
+                    // Track in PostHog
+                    if (window.posthog) {
+                        window.posthog.capture('report_generated', { ticker, user_id: user?.id, plan: user ? 'user' : 'anon' });
+                    }
 
                     if (user && !json.cached) {
                         supabase.from("reports").insert({
@@ -313,6 +325,22 @@ export default function ReportPage() {
             {/* CONTENT */}
             <div ref={ref} style={{ flex: 1, overflowY: "auto", padding: "14px 14px 96px 14px" }} key={step}>
                 {error && <div style={{ padding: "8px 12px", borderRadius: 8, background: `${T.warn}18`, border: `1px solid ${T.warn}40`, fontSize: 11, color: T.warn, textAlign: "center", marginBottom: 10 }}>{error}</div>}
+
+                {/* Email Capture Banner */}
+                {data && step === 0 && viewMode === "steps" && (
+                    <div style={{ background: '#111B2E', border: '1px solid #00E5B0', borderRadius: 8, padding: 16, margin: '0 auto 16px', maxWidth: 600, textAlign: 'center' }}>
+                        <p style={{ color: '#fff', margin: '0 0 8px', fontSize: 14, fontWeight: 600 }}>📊 Get the top 3 researched stocks every week</p>
+                        <form action="https://buttondown.com/api/emails/embed-subscribe/stockfortress" method="post" target="_blank" style={{ display: 'flex', justifyContent: 'center' }}>
+                            <input type="email" name="email" placeholder="your@email.com"
+                                style={{ padding: '8px 12px', borderRadius: 4, border: '1px solid #333', background: '#0A1628', color: '#fff', width: 200, fontSize: 13 }} />
+                            <button type="submit"
+                                style={{ padding: '8px 16px', borderRadius: 4, border: 'none', background: '#00E5B0', color: '#0A1628', fontWeight: 'bold', cursor: 'pointer', marginLeft: 4, fontSize: 13 }}>
+                                Subscribe
+                            </button>
+                        </form>
+                    </div>
+                )}
+
                 {viewMode === "snapshot" ? (
                     <AnalysisSnapshot data={data} onViewFull={() => { setViewMode("steps"); setStep(1); }} />
                 ) : (
