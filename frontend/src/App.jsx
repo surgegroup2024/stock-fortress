@@ -14,6 +14,7 @@ const BlogListPage = lazy(() => import("./pages/BlogListPage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const DisclaimerPage = lazy(() => import("./pages/DisclaimerPage"));
 
 const Loading = () => (
     <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif" }}>
@@ -49,6 +50,7 @@ export default function App() {
                             <Route path="/blog/:slug" element={<BlogPostPage />} />
                             <Route path="/terms" element={<TermsPage />} />
                             <Route path="/privacy" element={<PrivacyPage />} />
+                            <Route path="/disclaimer" element={<DisclaimerPage />} />
                             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                         </Routes>
                     </Suspense>

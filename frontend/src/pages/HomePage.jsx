@@ -257,9 +257,9 @@ export default function HomePage() {
                         <div>
                             <div style={{ fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1 }}>Legal</div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                                <span style={{ fontSize: 14, color: T.textDim, cursor: "not-allowed" }}>Terms</span>
-                                <span style={{ fontSize: 14, color: T.textDim, cursor: "not-allowed" }}>Privacy</span>
-                                <span style={{ fontSize: 14, color: T.textDim, cursor: "not-allowed" }}>Disclaimer</span>
+                                <Link to="/terms" style={{ fontSize: 14, color: T.textDim, textDecoration: "none" }}>Terms</Link>
+                                <Link to="/privacy" style={{ fontSize: 14, color: T.textDim, textDecoration: "none" }}>Privacy</Link>
+                                <Link to="/disclaimer" style={{ fontSize: 14, color: T.textDim, textDecoration: "none" }}>Disclaimer</Link>
                             </div>
                         </div>
                     </div>
