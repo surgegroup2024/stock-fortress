@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { T, CSS } from "../theme";
@@ -11,33 +11,68 @@ const VERDICT_COLORS = {
 
 export default function BlogListPage() {
     const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [total, setTotal] = useState(0);
-    const [pages, setPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(1);
     const [searchParams, setSearchParams] = useSearchParams();
+    const observer = useRef();
 
-    const page = parseInt(searchParams.get("page") || "1", 10);
     const verdict = searchParams.get("verdict") || "";
+    const LIMIT = 9; // Number of posts per load
 
+    // Reset when filter changes
     useEffect(() => {
-        setLoading(true);
-        let url = `/api/blog?page=${page}&limit=12`;
-        if (verdict) url += `&verdict=${verdict}`;
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                setPosts(data.posts || []);
-                setTotal(data.total || 0);
-                setPages(data.pages || 1);
-            })
-            .catch(() => setPosts([]))
-            .finally(() => setLoading(false));
+        setPosts([]);
+        setPage(1);
+        setHasMore(true);
+    }, [verdict]);
+
+    // Fetch posts
+    useEffect(() => {
+        const fetchPosts = async () => {
+            setLoading(true);
+            try {
+                let url = `/api/blog?page=${page}&limit=${LIMIT}`;
+                if (verdict) url += `&verdict=${verdict}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                setPosts(prev => {
+                    // Prevent duplicates if strict mode causes double-fetch
+                    const newPosts = data.posts || [];
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const uniqueNewPosts = newPosts.filter(p => !existingIds.has(p.id));
+                    return page === 1 ? newPosts : [...prev, ...uniqueNewPosts];
+                });
+
+                setHasMore((data.posts || []).length === LIMIT);
+            } catch (err) {
+                console.error("Failed to fetch posts", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPosts();
     }, [page, verdict]);
+
+    const lastPostElementRef = useCallback(node => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, hasMore]);
 
     const setFilter = (v) => {
         const params = new URLSearchParams();
         if (v) params.set("verdict", v);
         setSearchParams(params);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const formatDate = (iso) => {
@@ -92,14 +127,7 @@ export default function BlogListPage() {
 
             {/* Posts Grid */}
             <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px 80px" }}>
-                {loading ? (
-                    <div style={{ textAlign: "center", padding: 80 }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,${T.accent},#00C49A)`, display: "inline-flex", alignItems: "center", justifyContent: "center", animation: "pu 1.5s ease infinite" }}>
-                            <span style={{ fontSize: 20, fontWeight: 800, color: T.bg, fontFamily: "'IBM Plex Mono',monospace" }}>SF</span>
-                        </div>
-                        <div style={{ fontSize: 14, color: T.textDim, marginTop: 16 }}>Loading articles...</div>
-                    </div>
-                ) : posts.length === 0 ? (
+                {posts.length === 0 && !loading ? (
                     <div style={{ textAlign: "center", padding: 80 }}>
                         <div style={{ fontSize: 48, marginBottom: 16 }}>📝</div>
                         <div style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 8 }}>No articles yet</div>
@@ -111,73 +139,74 @@ export default function BlogListPage() {
                         }}>Run Your First Analysis →</Link>
                     </div>
                 ) : (
-                    <>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
-                            {posts.map(post => {
-                                const vc = VERDICT_COLORS[post.verdict] || VERDICT_COLORS.WATCH;
-                                return (
-                                    <Link to={`/blog/${post.slug}`} key={post.id} style={{
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
+                        {posts.map((post, index) => {
+                            const vc = VERDICT_COLORS[post.verdict] || VERDICT_COLORS.WATCH;
+                            const isLastPost = index === posts.length - 1;
+
+                            return (
+                                <Link
+                                    ref={isLastPost ? lastPostElementRef : null}
+                                    to={`/blog/${post.slug}`}
+                                    key={post.id}
+                                    style={{
                                         textDecoration: "none",
                                         background: T.card, borderRadius: 18, border: `1px solid ${T.border}`,
                                         overflow: "hidden", transition: "all .3s cubic-bezier(.25,.8,.25,1)",
                                         display: "flex", flexDirection: "column"
                                     }}
-                                        onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 20px 40px -10px rgba(0,0,0,0.15)"; }}
-                                        onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-                                    >
-                                        {/* Card Top */}
-                                        <div style={{ padding: "20px 20px 0" }}>
-                                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 20px 40px -10px rgba(0,0,0,0.15)"; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                                >
+                                    {/* Card Top */}
+                                    <div style={{ padding: "20px 20px 0" }}>
+                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                <span style={{
+                                                    padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 700,
+                                                    fontFamily: "'IBM Plex Mono',monospace", background: `${T.accent}15`, color: T.accent
+                                                }}>{post.ticker}</span>
+                                                {post.verdict && (
                                                     <span style={{
-                                                        padding: "3px 10px", borderRadius: 6, fontSize: 12, fontWeight: 700,
-                                                        fontFamily: "'IBM Plex Mono',monospace", background: `${T.accent}15`, color: T.accent
-                                                    }}>{post.ticker}</span>
-                                                    {post.verdict && (
-                                                        <span style={{
-                                                            padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
-                                                            background: vc.bg, color: vc.text, textTransform: "uppercase"
-                                                        }}>{post.verdict}</span>
-                                                    )}
-                                                </div>
-                                                <span style={{ fontSize: 11, color: T.textDim }}>{post.views || 0} views</span>
+                                                        padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 700,
+                                                        background: vc.bg, color: vc.text, textTransform: "uppercase"
+                                                    }}>{post.verdict}</span>
+                                                )}
                                             </div>
-                                            <h2 style={{ fontSize: 17, fontWeight: 700, color: T.text, lineHeight: 1.35, marginBottom: 10, minHeight: 46 }}>
-                                                {post.title}
-                                            </h2>
+                                            <span style={{ fontSize: 11, color: T.textDim }}>{post.views || 0} views</span>
                                         </div>
+                                        <h2 style={{ fontSize: 17, fontWeight: 700, color: T.text, lineHeight: 1.35, marginBottom: 10, minHeight: 46 }}>
+                                            {post.title}
+                                        </h2>
+                                    </div>
 
-                                        {/* Card Body */}
-                                        <div style={{ padding: "0 20px 20px", flex: 1, display: "flex", flexDirection: "column" }}>
-                                            <p style={{ fontSize: 14, color: T.textSec, lineHeight: 1.55, flex: 1, marginBottom: 16 }}>
-                                                {post.excerpt}
-                                            </p>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                <span style={{ fontSize: 12, color: T.textDim }}>{formatDate(post.created_at)}</span>
-                                                <span style={{ fontSize: 12, fontWeight: 600, color: T.accent }}>Read →</span>
-                                            </div>
+                                    {/* Card Body */}
+                                    <div style={{ padding: "0 20px 20px", flex: 1, display: "flex", flexDirection: "column" }}>
+                                        <p style={{ fontSize: 14, color: T.textSec, lineHeight: 1.55, flex: 1, marginBottom: 16 }}>
+                                            {post.excerpt}
+                                        </p>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <span style={{ fontSize: 12, color: T.textDim }}>{formatDate(post.created_at)}</span>
+                                            <span style={{ fontSize: 12, fontWeight: 600, color: T.accent }}>Read →</span>
                                         </div>
-                                    </Link>
-                                );
-                            })}
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {loading && (
+                    <div style={{ textAlign: "center", padding: 40, width: "100%" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg,${T.accent},#00C49A)`, display: "inline-flex", alignItems: "center", justifyContent: "center", animation: "pu 1.5s ease infinite", margin: "0 auto" }}>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: T.bg, fontFamily: "'IBM Plex Mono',monospace" }}>SF</span>
                         </div>
-
-                        {/* Pagination */}
-                        {pages > 1 && (
-                            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 48 }}>
-                                {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
-                                    <button key={p} onClick={() => { const params = new URLSearchParams(searchParams); params.set("page", String(p)); setSearchParams(params); }}
-                                        style={{
-                                            width: 40, height: 40, borderRadius: 10,
-                                            border: `1px solid ${p === page ? T.accent : T.border}`,
-                                            background: p === page ? `${T.accent}15` : "transparent",
-                                            color: p === page ? T.accent : T.textSec,
-                                            fontSize: 14, fontWeight: 600, cursor: "pointer"
-                                        }}>{p}</button>
-                                ))}
-                            </div>
-                        )}
-                    </>
+                    </div>
+                )}
+                {!hasMore && posts.length > 0 && (
+                    <div style={{ textAlign: "center", padding: 40, color: T.textDim, fontSize: 14 }}>
+                        You've reached the end.
+                    </div>
                 )}
             </div>
         </div>
