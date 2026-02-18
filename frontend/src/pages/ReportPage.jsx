@@ -13,6 +13,17 @@ import { supabase } from "../lib/supabase";
 const PLAN_LIMITS = { free: 3, pro: 30, premium: Infinity };
 const ANON_LIMIT = 1;
 
+const LOADING_MESSAGES = [
+    "Initializing market data scan...",
+    "Analyzing business model and competitive moat...",
+    "Crunching financial statements & ratios...",
+    "Reviewing latest earnings call transcripts...",
+    "Evaluating bull and bear cases...",
+    "Assessing regulatory and macro risks...",
+    "Calculating valuation models (DCF & P/E)...",
+    "Finalizing investment verdict..."
+];
+
 function getAnonState() {
     const key = `sf_anon_${new Date().getFullYear()}_${new Date().getMonth()}`;
     const used = parseInt(localStorage.getItem(key) || "0", 10);
@@ -88,8 +99,17 @@ export default function ReportPage() {
     const [paywalled, setPaywalled] = useState(false);
     const [viewMode, setViewMode] = useState("steps"); // steps, snapshot
     const [usageInfo, setUsageInfo] = useState({ used: 0, limit: 3 });
+    const [msgIndex, setMsgIndex] = useState(0);
     const ref = useRef(null);
     const ticker = (paramTicker || "").toUpperCase().trim();
+
+    useEffect(() => {
+        if (!loading) return;
+        const interval = setInterval(() => {
+            setMsgIndex(prev => (prev + 1) % LOADING_MESSAGES.length);
+        }, 3500);
+        return () => clearInterval(interval);
+    }, [loading]);
 
     const addToWatchlist = async () => {
         if (!user || saving) return;
@@ -114,6 +134,7 @@ export default function ReportPage() {
 
         const load = async () => {
             setLoading(true);
+            setMsgIndex(0);
             setError("");
 
             // ── CHECK RATE LIMIT ──
@@ -254,9 +275,11 @@ export default function ReportPage() {
                         <span style={{ fontSize: 28, fontWeight: 800, color: T.bg, fontFamily: "'IBM Plex Mono',monospace" }}>SF</span>
                     </div>
                     <div style={{ fontSize: 18, fontWeight: 700, color: T.text, marginBottom: 8 }}>Analyzing {ticker}...</div>
-                    <div style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6 }}>Stock Fortress AI is searching financial data, earnings reports,<br />and analyst estimates in real-time.</div>
-                    <div style={{ marginTop: 24, width: 180, height: 4, background: T.surface, borderRadius: 2, overflow: "hidden", margin: "24px auto 0" }}>
-                        <div style={{ width: "60%", height: "100%", background: `linear-gradient(90deg,${T.accent},${T.blue})`, borderRadius: 2, animation: "shimmer 2s ease infinite", backgroundSize: "200% 100%" }} />
+                    <div key={msgIndex} style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6, minHeight: 42, animation: "fi .5s ease both" }}>
+                        {LOADING_MESSAGES[msgIndex]}
+                    </div>
+                    <div style={{ marginTop: 24, width: 220, height: 4, background: T.surface, borderRadius: 2, overflow: "hidden", margin: "24px auto 0" }}>
+                        <div style={{ width: "40%", height: "100%", background: `linear-gradient(90deg,${T.accent},${T.blue})`, borderRadius: 2, animation: "shimmer 2s linear infinite", backgroundSize: "200% 100%" }} />
                     </div>
                 </div>
             </div>
