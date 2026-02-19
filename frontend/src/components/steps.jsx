@@ -183,10 +183,11 @@ export const SentimentRow = ({ text }) => {
 export const DCFCard = ({ text }) => {
     if (!text) return null;
     // Extract Implied Price/Value (Robust + Suffix)
-    const priceMatch = text.match(/(?:Implied Share Price|Intrinsic Value|Fair Value|Implied Value).*?\$([\d\.,]+)\s*([MBT]r?illion|[MBT])?/i);
-    const rawVal = priceMatch ? priceMatch[1] : null;
+    // Only match full-word suffixes (Trillion/Billion/Million) to avoid grabbing stray letters
+    const priceMatch = text.match(/(?:Implied Share Price|Intrinsic Value|Fair Value|Implied Value).*?\$([\d\.,]+)\s*(Trillion|Billion|Million)?/i);
+    const rawVal = priceMatch ? priceMatch[1].replace(/\.$/, '') : null; // strip trailing dot
     const suffix = priceMatch ? priceMatch[2] : null;
-    const isTotalVal = suffix && (suffix.toUpperCase().includes("M") || suffix.toUpperCase().includes("B") || suffix.toUpperCase().includes("T"));
+    const isTotalVal = suffix && /^(Trillion|Billion|Million)$/i.test(suffix);
     const label = isTotalVal ? "Implied Market Cap" : "Intrinsic Share Price";
     const displayVal = rawVal ? `${rawVal}${suffix ? " " + suffix : ""}` : null;
 
@@ -417,13 +418,13 @@ export function FinancialGrid({ s }) {
             {/* CASH */}
             <div style={{ background: T.surface, padding: "12px 14px", borderRadius: 12, border: `1px solid ${T.border}` }}>
                 <div style={{ fontSize: 10, color: T.textDim, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>Cash Mountain</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginTop: 4 }}>{s.cash_position?.split(/(\$?\d+(?:\.\d+)?[BMK]?)/)[1] || s.cash_position}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginTop: 4 }}>{s.cash_position?.match(/(\$?[\d.,]+\s*(?:Trillion|Billion|Million|[TBMK])?)/i)?.[1] || s.cash_position}</div>
             </div>
 
             {/* FCF */}
             <div style={{ background: T.surface, padding: "12px 14px", borderRadius: 12, border: `1px solid ${T.border}` }}>
                 <div style={{ fontSize: 10, color: T.textDim, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>Free Cash Flow</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.accent, marginTop: 4 }}>{s.free_cash_flow_latest?.split(/(\$?\d+(?:\.\d+)?[BMK]?)/)[1] || s.free_cash_flow_latest}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.accent, marginTop: 4 }}>{s.free_cash_flow_latest?.match(/(\$?[\d.,]+\s*(?:Trillion|Billion|Million|[TBMK])?)/i)?.[1] || s.free_cash_flow_latest}</div>
             </div>
         </div>
     );
