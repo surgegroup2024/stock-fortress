@@ -45,12 +45,64 @@ export const CSS = `
 @keyframes gl { 0%,100%{box-shadow:0 0 20px ${T.accentDim}}50%{box-shadow:0 0 40px ${T.accentMid}} }
 @keyframes spin { to { transform: rotate(360deg) } }
 @keyframes shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
+
+/* Step Transition Animations */
+@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
+@keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+@keyframes fadeStepIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes confettiBurst {
+  0% { transform: scale(0) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+  100% { transform: scale(1) rotate(360deg); opacity: 1; }
+}
+@keyframes confettiPiece {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(80px) rotate(720deg); opacity: 0; }
+}
+@keyframes celebratePop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 ${T.accent}40; }
+  50% { box-shadow: 0 0 0 6px ${T.accent}00; }
+}
+
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 body { background:${T.bg}; overflow-x:hidden; }
 ::-webkit-scrollbar{width:0}
 input::placeholder{color:${T.textDim}}
 .clickable { cursor: pointer; transition: transform 0.2s; }
 .clickable:active { transform: scale(0.95); }
+
+/* Step Transition Wrapper */
+.step-slide-next { animation: slideInRight 250ms ease-out both; }
+.step-slide-prev { animation: slideInLeft 250ms ease-out both; }
+
+/* Nav Button Enhanced */
+.nav-btn { transition: all 0.15s ease; }
+.nav-btn:active { transform: scale(0.95); opacity: 0.8; }
+.nav-btn:disabled { pointer-events: none; }
+
+/* Verdict Celebration */
+.verdict-celebrate { animation: celebratePop 0.5s ease-out both; }
+
+/* Show More Toggle */
+.show-more-btn {
+  background: none; border: none; color: ${T.accent}; font-size: 12px; font-weight: 600;
+  cursor: pointer; padding: 6px 0; font-family: 'Space Grotesk', sans-serif;
+  display: flex; align-items: center; gap: 4px;
+}
+.show-more-btn:hover { text-decoration: underline; }
+
+/* Reduced motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  .step-slide-next, .step-slide-prev { animation: fadeStepIn 150ms ease both !important; }
+  * { animation-duration: 0.01ms !important; }
+}
 
 /* RESPONSIVE LAYOUT */
 .layout-container {

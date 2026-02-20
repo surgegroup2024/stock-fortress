@@ -39,12 +39,17 @@ export const Flags = ({ items, type = "red" }) => {
     </div>);
 };
 
-export const NavBtn = ({ onClick, children, primary, disabled }) => (
-    <button onClick={onClick} disabled={disabled} style={{
-        flex: 1, padding: "13px 18px", borderRadius: 12, border: primary ? "none" : `1px solid ${T.border}`,
+export const NavBtn = ({ onClick, children, primary, disabled, isLoading }) => (
+    <button onClick={onClick} disabled={disabled || isLoading} className="nav-btn" style={{
+        flex: 1, padding: "14px 18px", borderRadius: 12, border: primary ? "none" : `1px solid ${T.border}`,
         background: primary ? `linear-gradient(135deg,${T.accent},#059669)` : "transparent", color: primary ? "#FFFFFF" : T.textSec, fontSize: 14, fontWeight: 700,
-        cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? .35 : 1, transition: "all .2s", fontFamily: "'Space Grotesk',sans-serif", letterSpacing: .3
-    }}>{children}</button>
+        cursor: (disabled || isLoading) ? "not-allowed" : "pointer", opacity: (disabled || isLoading) ? .45 : 1, transition: "all .15s ease", fontFamily: "'Space Grotesk',sans-serif", letterSpacing: .3,
+        minHeight: 48, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+        boxShadow: primary ? `0 4px 14px ${T.accent}30` : "none",
+    }}>
+        {isLoading && <span style={{ width: 14, height: 14, border: `2px solid ${primary ? '#FFF' : T.textDim}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite", flexShrink: 0 }} />}
+        {children}
+    </button>
 );
 
 export const SectionLabel = ({ children, color = T.textSec }) => (

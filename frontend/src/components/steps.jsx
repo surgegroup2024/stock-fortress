@@ -1,7 +1,67 @@
+import { useState } from "react";
 import { T, SEVERITY, MOAT, GRADE, ACTION } from "../theme";
 import { Badge, Card, MetricRow, Flags, SectionLabel } from "./atoms";
 
-// ─── STEP VIEWS ───
+// ─── SCANNABLE CONTENT HELPERS ───
+
+/** Key Takeaway card — highlighted box at top of each step */
+export const KeyTakeaway = ({ text }) => {
+    if (!text) return null;
+    return (
+        <div style={{
+            background: `linear-gradient(135deg, ${T.accent}10, ${T.blue}08)`,
+            border: `1px solid ${T.accent}30`,
+            borderRadius: 12,
+            padding: "12px 14px",
+            marginBottom: 14,
+        }}>
+            <div style={{
+                fontSize: 10, fontWeight: 800, color: T.accent,
+                letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 4,
+                display: "flex", alignItems: "center", gap: 5,
+            }}>
+                📊 KEY TAKEAWAY
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: T.text, lineHeight: 1.5 }}>
+                {text}
+            </div>
+        </div>
+    );
+};
+
+/** Collapsible content — shows first N items, rest behind "Show more" */
+export const CollapsibleContent = ({ children, maxItems = 4 }) => {
+    const [expanded, setExpanded] = useState(false);
+    const items = Array.isArray(children) ? children : [children];
+    if (items.length <= maxItems) return <>{items}</>;
+
+    return (
+        <>
+            {expanded ? items : items.slice(0, maxItems)}
+            <button
+                className="show-more-btn"
+                onClick={() => setExpanded(!expanded)}
+            >
+                {expanded ? "Show less ▲" : `Show more (${items.length - maxItems} more) ▼`}
+            </button>
+        </>
+    );
+};
+
+/** "So what?" one-liner at bottom of a step */
+export const SoWhat = ({ text }) => {
+    if (!text) return null;
+    return (
+        <div style={{
+            fontSize: 12, fontStyle: "italic", color: T.textDim,
+            lineHeight: 1.6, padding: "8px 0 2px",
+            borderTop: `1px solid ${T.border}22`, marginTop: 10,
+        }}>
+            <span style={{ fontWeight: 600, fontStyle: "normal", color: T.textSec }}>So what? </span>
+            {text}
+        </div>
+    );
+};
 
 // ─── STEP VIEWS ───
 
@@ -324,19 +384,23 @@ export function Landing({ d, onStart }) {
 export function S1({ d, onNext }) {
     const s = d.step_1_know_what_you_own;
     return (<div>
+        <KeyTakeaway text={s.one_liner} />
         <Card delay={.1}><SectionLabel color={T.accent}>In Plain English</SectionLabel>
             <div style={{ fontSize: 16, color: T.text, lineHeight: 1.7, fontWeight: 500 }}>"{s.one_liner}"</div></Card>
         <Card delay={.2}><SectionLabel>How They Make Money</SectionLabel>
             <div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}>{s.how_it_makes_money}</div></Card>
         <Card delay={.3}><SectionLabel>Key Products</SectionLabel>
-            {s.key_products_or_services.map((p, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "7px 0", borderBottom: i < s.key_products_or_services.length - 1 ? `1px solid ${T.border}22` : "none", animation: `fi .3s ease ${.08 * i}s both` }}>
-                <span style={{ color: T.accent, fontSize: 7 }}>●</span><span style={{ color: T.textSec, fontSize: 13 }}>{p}</span></div>))}</Card>
+            <CollapsibleContent maxItems={4}>
+                {s.key_products_or_services.map((p, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "7px 0", borderBottom: i < s.key_products_or_services.length - 1 ? `1px solid ${T.border}22` : "none", animation: `fi .3s ease ${.08 * i}s both` }}>
+                    <span style={{ color: T.accent, fontSize: 7 }}>●</span><span style={{ color: T.textSec, fontSize: 13 }}>{p}</span></div>))}
+            </CollapsibleContent></Card>
         <Card delay={.4}><MetricRow label="Target Customer" value={s.customer_type} />
             <div style={{ marginTop: 10, textAlign: "center" }}><span style={{ fontSize: 11, color: T.textDim }}>Could you explain this to a friend?</span>
                 <div style={{ marginTop: 5, cursor: "pointer" }} onClick={onNext} className="clickable">
                     <Badge color={s.pass_fail === "YES" ? T.accent : T.danger}>{s.pass_fail} ➔</Badge>
                 </div>
             </div>
+            <SoWhat text={`You should be able to explain what ${d.meta?.company_name || 'this company'} does in one sentence before investing.`} />
         </Card>
     </div>);
 }
@@ -435,6 +499,7 @@ export function S2({ d }) {
     const g = GRADE[s.financial_health_grade] || GRADE.C;
 
     return (<div>
+        <KeyTakeaway text={`Financial Health Grade: ${s.financial_health_grade} (${g.l}) — Revenue ${s.revenue_growth_yoy || 'N/A'} YoY`} />
         <Card delay={.1} glow>
             <div style={{ textAlign: "center", marginBottom: 4 }}>
                 <SectionLabel color={T.textDim}>Financial Health Grade</SectionLabel>
@@ -479,6 +544,7 @@ export function S2({ d }) {
 
         <Card delay={.3}><SectionLabel color={T.danger}>🚩 Red Flags</SectionLabel><Flags items={s.red_flags} type="red" /></Card>
         <Card delay={.4}><SectionLabel color={T.accent}>✅ Green Flags</SectionLabel><Flags items={s.green_flags} type="green" /></Card>
+        <SoWhat text={`A grade of ${s.financial_health_grade} means the balance sheet ${s.financial_health_grade >= 'C' ? 'needs attention' : 'is solid'}. Focus on the trend, not one quarter.`} />
     </div>);
 }
 
@@ -535,36 +601,44 @@ export function S2A({ d }) {
 export function S3({ d }) {
     const s = d.step_3_understand_the_story;
     return (<div>
+        <KeyTakeaway text={s.bull_case?.split('.')[0] + '.'} />
         <Card delay={.1} border={T.accent}><SectionLabel color={T.accent}>Bull Case</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}><SmartText text={s.bull_case} /></div></Card>
         <Card delay={.15}><SectionLabel color={T.blue}>Base Case</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}><SmartText text={s.base_case} /></div></Card>
         <Card delay={.2} border={T.danger}><SectionLabel color={T.danger}>Bear Case</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}><SmartText text={s.bear_case} /></div></Card>
         <Card delay={.3} style={{ background: `linear-gradient(135deg,${T.bg2},${T.surface}44)` }}><SectionLabel color={T.gold}>Macro Overlay</SectionLabel><div style={{ fontSize: 13, color: T.textSec, lineHeight: 1.7 }}><SmartText text={s.macro_overlay} /></div></Card>
-        <Card delay={.4}><SectionLabel color={T.accent}>Must Go Right</SectionLabel><Flags items={s.what_must_go_right} type="green" /></Card>
-        <Card delay={.5}><SectionLabel color={T.danger}>Bearish Catalysts</SectionLabel><Flags items={s.what_could_break_the_story} type="red" /></Card>
+        <Card delay={.4}><SectionLabel color={T.accent}>Must Go Right</SectionLabel><CollapsibleContent maxItems={3}><Flags items={s.what_must_go_right} type="green" /></CollapsibleContent></Card>
+        <Card delay={.5}><SectionLabel color={T.danger}>Bearish Catalysts</SectionLabel><CollapsibleContent maxItems={3}><Flags items={s.what_could_break_the_story} type="red" /></CollapsibleContent></Card>
         <Card delay={.6}><SectionLabel color={T.blue}>Timeline</SectionLabel>
             {s.catalyst_timeline?.map((c, i) => (<div key={i} style={{ fontSize: 12, color: T.textSec, marginBottom: 5 }}>• {c}</div>))}
         </Card>
+        <SoWhat text="The story matters because it tells you what the market is pricing in — and what could surprise it." />
     </div>);
 }
 
 export function S4({ d }) {
     const s = d.step_4_know_the_risks;
+    const topRisk = s.top_risks?.[0];
     return (<div>
-        {s.top_risks.map((r, i) => (<Card key={i} delay={.1 * (i + 1)} border={SEVERITY[r.severity]}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: T.text, flex: 1, marginRight: 8 }}>{r.risk}</div>
-                <div style={{ display: "flex", gap: 4 }}>
-                    <Badge color={SEVERITY[r.severity]}>{r.severity}</Badge>
-                    <Badge color={T.textDim}>Prob: {r.likelihood}</Badge>
+        <KeyTakeaway text={topRisk ? `Top Risk: ${topRisk.risk} (${topRisk.severity})` : 'Risk analysis in progress...'} />
+        <CollapsibleContent maxItems={3}>
+            {s.top_risks.map((r, i) => (<Card key={i} delay={.1 * (i + 1)} border={SEVERITY[r.severity]}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: T.text, flex: 1, marginRight: 8 }}>{r.risk}</div>
+                    <div style={{ display: "flex", gap: 4 }}>
+                        <Badge color={SEVERITY[r.severity]}>{r.severity}</Badge>
+                        <Badge color={T.textDim}>Prob: {r.likelihood}</Badge>
+                    </div>
                 </div>
-            </div>
-            <div style={{ fontSize: 12, color: T.textSec, lineHeight: 1.55 }}>{r.explanation}</div></Card>))}
+                <div style={{ fontSize: 12, color: T.textSec, lineHeight: 1.55 }}>{r.explanation}</div></Card>))}
+        </CollapsibleContent>
         <Card delay={.4}><SectionLabel color={T.gold}>Ownership & Analysts</SectionLabel>
             <AnalystConsensus text={s.ownership_signals && s.ownership_signals !== "None" ? s.ownership_signals : "No data available."} />
         </Card>
         <Card delay={.5}>
             <MetricRow label="Regulatory" value={s.regulatory_exposure} hl={T.danger} />
-            <div style={{ marginTop: 8, fontSize: 12, color: T.textSec, lineHeight: 1.55 }}><span style={{ color: T.warn, fontWeight: 600 }}>Concentration: </span><SmartText text={s.concentration_risk} /></div></Card>
+            <div style={{ marginTop: 8, fontSize: 12, color: T.textSec, lineHeight: 1.55 }}><span style={{ color: T.warn, fontWeight: 600 }}>Concentration: </span><SmartText text={s.concentration_risk} /></div>
+            <SoWhat text="Every stock has risks. The question is whether you're being compensated for taking them." />
+        </Card>
     </div>);
 }
 
@@ -572,14 +646,18 @@ export function S5({ d }) {
     const s = d.step_5_check_the_competition;
     const mc = MOAT[s.moat_strength] || T.textDim;
     return (<div>
-        {s.main_competitors.map((c, i) => (<Card key={i} delay={.1 * (i + 1)}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 5 }}>{c.name}</div>
-            <div style={{ fontSize: 12, color: T.textDim, marginBottom: 7 }}>{c.why_compete}</div>
-            <div style={{ fontSize: 12, color: T.warn, lineHeight: 1.5 }}><span style={{ fontWeight: 600 }}>Edge: </span>{c.their_advantage}</div></Card>))}
+        <KeyTakeaway text={`Moat Strength: ${s.moat_strength} — ${s.main_competitors?.length || 0} key competitors identified`} />
+        <CollapsibleContent maxItems={3}>
+            {s.main_competitors.map((c, i) => (<Card key={i} delay={.1 * (i + 1)}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 5 }}>{c.name}</div>
+                <div style={{ fontSize: 12, color: T.textDim, marginBottom: 7 }}>{c.why_compete}</div>
+                <div style={{ fontSize: 12, color: T.warn, lineHeight: 1.5 }}><span style={{ fontWeight: 600 }}>Edge: </span>{c.their_advantage}</div></Card>))}
+        </CollapsibleContent>
         <Card delay={.4} glow><div style={{ textAlign: "center" }}>
             <SectionLabel color={T.textDim}>Competitive Moat</SectionLabel>
             <div style={{ display: "inline-block", padding: "7px 22px", borderRadius: 10, background: `${mc}18`, border: `2px solid ${mc}`, fontSize: 16, fontWeight: 700, color: mc, letterSpacing: 1 }}>{s.moat_strength}</div>
             <div style={{ fontSize: 12, color: T.textSec, lineHeight: 1.6, marginTop: 10 }}>{s.moat_explanation}</div></div></Card>
+        <SoWhat text={`A ${s.moat_strength?.toLowerCase() || 'narrow'} moat means ${s.moat_strength === 'STRONG' ? 'durable competitive advantages — pricing power and margin stability.' : 'competitors could erode margins. Watch for market share shifts.'}`} />
     </div>);
 }
 
@@ -587,6 +665,7 @@ export function S6({ d }) {
     const s = d.step_6_valuation_reality_check;
     const ec = { CHEAP: T.accent, FAIR: T.blue, EXPENSIVE: T.warn, SPECULATIVE: T.danger }[s.is_it_expensive] || T.text;
     return (<div>
+        <KeyTakeaway text={`Valuation: ${s.is_it_expensive || 'N/A'} — Current P/E ${s.current_pe || 'N/A'}, Forward P/E ${s.forward_pe || 'N/A'}`} />
         <Card delay={.1}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <SectionLabel>Valuation Multiples</SectionLabel>
@@ -627,6 +706,7 @@ export function S6({ d }) {
                         <div style={{ fontSize: 17, fontWeight: 700, color: x.c, fontFamily: "'IBM Plex Mono',monospace" }}>{x.v}</div>
                     </div>
                 </div>))}</Card>
+        <SoWhat text={`The stock is currently rated ${s.is_it_expensive || 'unrated'} on valuation. Compare price targets to decide if the risk/reward makes sense for your portfolio.`} />
     </div>);
 }
 
@@ -634,8 +714,9 @@ export function S7({ d }) {
     const s = d.step_7_verdict;
     const a = ACTION[s.action] || ACTION.WATCH;
     return (<div>
+        <KeyTakeaway text={`Verdict: ${s.action} — ${s.one_line_reason}`} />
         <Card delay={.1} style={{ background: a.bg, border: `2px solid ${a.bc}`, boxShadow: a.g }}>
-            <div style={{ textAlign: "center", padding: "14px 0" }}>
+            <div className="verdict-celebrate" style={{ textAlign: "center", padding: "14px 0" }}>
                 <div style={{ fontSize: 44, marginBottom: 6 }}>{a.i}</div>
                 <div style={{ fontSize: 34, fontWeight: 800, color: a.c, letterSpacing: 2, fontFamily: "'IBM Plex Mono',monospace" }}>{s.action}</div>
                 <div style={{ marginTop: 7 }}><Badge color={T.textSec}>Confidence: {s.confidence}</Badge></div>

@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { T, STEPS, TOTAL_STEPS, CSS } from "../theme";
 import { NavBtn } from "../components/atoms";
 import { Landing, S1, S2, S2A, S3, S4, S5, S6, S7, Gut } from "../components/steps";
 import AnalysisSnapshot from "../components/AnalysisSnapshot";
+import WizardProgressBar from "../components/WizardProgressBar";
+import VerdictTeaser from "../components/VerdictTeaser";
 import { DEMOS } from "../data/demos";
 import { useAuth } from "../components/AuthProvider";
 import { supabase } from "../lib/supabase";
@@ -100,6 +102,10 @@ export default function ReportPage() {
     const [viewMode, setViewMode] = useState("steps"); // steps, snapshot
     const [usageInfo, setUsageInfo] = useState({ used: 0, limit: 3 });
     const [msgIndex, setMsgIndex] = useState(0);
+    // ─── NEW: Navigation state for debounce & transitions ───
+    const [isNavigating, setIsNavigating] = useState(false);
+    const [direction, setDirection] = useState("next"); // "next" or "prev"
+    const [animKey, setAnimKey] = useState(0); // force re-render for animation
     const ref = useRef(null);
     const ticker = (paramTicker || "").toUpperCase().trim();
 
@@ -240,14 +246,54 @@ export default function ReportPage() {
         return () => { cancelled = true; };
     }, [ticker, navigate, user, subscription]);
 
+    // Scroll to top on step change
     useEffect(() => { ref.current?.scrollTo({ top: 0, behavior: "smooth" }) }, [step]);
 
-    const next = () => step < STEPS.length - 1 && setStep(s => s + 1);
-    const prev = () => step > 0 ? setStep(s => s - 1) : navigate("/");
+    // ─── DEBOUNCED NAVIGATION (fixes rage-click issue) ───
+    const handleNext = useCallback(() => {
+        if (isNavigating || step >= STEPS.length - 1) return;
+        setIsNavigating(true);
+        setDirection("next");
+        setStep(s => s + 1);
+        setAnimKey(k => k + 1);
+        // Track step progression in PostHog
+        if (window.posthog) {
+            window.posthog.capture('wizard_step_next', { ticker, from_step: step, to_step: step + 1 });
+        }
+        setTimeout(() => setIsNavigating(false), 300);
+    }, [isNavigating, step, ticker]);
+
+    const handleBack = useCallback(() => {
+        if (isNavigating) return;
+        setIsNavigating(true);
+        setDirection("prev");
+        if (step > 0) {
+            setStep(s => s - 1);
+            setAnimKey(k => k + 1);
+            if (window.posthog) {
+                window.posthog.capture('wizard_step_back', { ticker, from_step: step, to_step: step - 1 });
+            }
+        } else {
+            navigate("/");
+        }
+        setTimeout(() => setIsNavigating(false), 300);
+    }, [isNavigating, step, navigate, ticker]);
+
+    // ─── KEYBOARD NAVIGATION (desktop) ───
+    useEffect(() => {
+        if (viewMode !== "steps" || !data) return;
+        const handleKey = (e) => {
+            if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+            if (e.key === "ArrowRight") handleNext();
+            if (e.key === "ArrowLeft") handleBack();
+        };
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [viewMode, data, handleNext, handleBack]);
 
     const VIEWS = data ? {
-        landing: <Landing d={data} onStart={next} />,
-        s1: <S1 d={data} onNext={next} />, s2: <S2 d={data} />, s2a: <S2A d={data} />,
+        landing: <Landing d={data} onStart={handleNext} />,
+        s1: <S1 d={data} onNext={handleNext} />, s2: <S2 d={data} />, s2a: <S2A d={data} />,
         s3: <S3 d={data} />, s4: <S4 d={data} />, s5: <S5 d={data} />,
         s6: <S6 d={data} />, s7: <S7 d={data} />, gut: <Gut d={data} />,
     } : {};
@@ -302,6 +348,19 @@ export default function ReportPage() {
 
     const cur = STEPS[step];
 
+    // Determine nav button labels
+    const isVerdictStep = step === 8; // S7 — The Verdict
+    const isLastStep = step >= STEPS.length - 1;
+    const isFirstResearchStep = step === 1;
+
+    let nextLabel = "Next Step →";
+    if (isVerdictStep && !isLastStep) nextLabel = "Continue →";
+    if (step === STEPS.length - 2) nextLabel = "Final Step →";
+    if (isLastStep) nextLabel = "New Research ↗";
+
+    // Special: on step 7 (S6 Valuation), tease the verdict
+    if (step === 7) nextLabel = "See Your Verdict ✅";
+
     return (
         <div className="layout-container" style={{ height: "100dvh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
             <style>{CSS}</style>
@@ -311,9 +370,9 @@ export default function ReportPage() {
                 <link rel="canonical" href={`https://stockfortress.app/report/${ticker}`} />
             </Helmet>
 
-            {/* HEADER */}
+            {/* ─── HEADER ─── */}
             <div style={{ padding: "10px 16px", borderBottom: `1px solid ${T.border}22`, background: `${T.bg}EE`, backdropFilter: "blur(12px)", zIndex: 10, flexShrink: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: step > 0 ? 8 : 0 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }} onClick={() => navigate("/")}>
                         <span style={{ fontSize: 14, fontWeight: 800, color: T.accent, fontFamily: "'IBM Plex Mono',monospace", letterSpacing: 1 }}>SF</span>
                         <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Stock Fortress</span>
@@ -340,19 +399,20 @@ export default function ReportPage() {
                         </button>
                     </div>
                 </div>
-                {viewMode === "steps" && step > 0 && (<div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <span style={{ fontSize: 14 }}>{cur.i}</span>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: T.text }}>Step {cur.n}: {cur.l}</span></div>
-                        <span style={{ fontSize: 11, color: T.textDim, fontFamily: "'IBM Plex Mono',monospace" }}>{step}/{TOTAL_STEPS}</span></div>
-                    <div style={{ width: "100%", height: 3, background: T.surface, borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ width: `${(step / TOTAL_STEPS) * 100}%`, height: "100%", background: `linear-gradient(90deg,${T.accent},${T.blue})`, borderRadius: 2, transition: "width .4s cubic-bezier(.4,0,.2,1)" }} /></div>
-                </div>)}
             </div>
 
-            {/* CONTENT */}
-            <div ref={ref} style={{ flex: 1, overflowY: "auto", padding: "14px 14px 96px 14px" }} key={step}>
+            {/* ─── WIZARD PROGRESS BAR (replaces old thin bar) ─── */}
+            {viewMode === "steps" && (
+                <WizardProgressBar currentStep={step} />
+            )}
+
+            {/* ─── VERDICT TEASER ─── */}
+            {viewMode === "steps" && data && (
+                <VerdictTeaser currentStep={step} ticker={ticker} />
+            )}
+
+            {/* ─── CONTENT with slide transitions ─── */}
+            <div ref={ref} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "14px 14px 96px 14px" }}>
                 {error && <div style={{ padding: "8px 12px", borderRadius: 8, background: `${T.warn}18`, border: `1px solid ${T.warn}40`, fontSize: 11, color: T.warn, textAlign: "center", marginBottom: 10 }}>{error}</div>}
 
                 {/* Email Capture Banner */}
@@ -373,17 +433,56 @@ export default function ReportPage() {
                 {viewMode === "snapshot" ? (
                     <AnalysisSnapshot data={data} onViewFull={() => { setViewMode("steps"); setStep(1); }} />
                 ) : (
-                    VIEWS[cur.k]
+                    /* Animated step wrapper */
+                    <div
+                        key={animKey}
+                        className={step === 0 ? "" : (direction === "next" ? "step-slide-next" : "step-slide-prev")}
+                        style={{ willChange: "transform, opacity" }}
+                    >
+                        {VIEWS[cur.k]}
+                    </div>
                 )}
             </div>
 
-            {/* NAV */}
-            {
-                viewMode === "steps" && step > 0 && (<div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "10px 14px", background: `linear-gradient(transparent, ${T.bg} 20%)`, paddingTop: 28, display: "flex", gap: 10, zIndex: 10 }}>
-                    <NavBtn onClick={prev}>← Back</NavBtn>
-                    {step < STEPS.length - 1 ? <NavBtn onClick={next} primary>Next Step →</NavBtn> : <NavBtn onClick={() => navigate("/")} primary>New Research</NavBtn>}
-                </div>)
-            }
+            {/* ─── NAVIGATION BAR (sticky bottom) ─── */}
+            {viewMode === "steps" && step > 0 && (
+                <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0,
+                    padding: "10px 14px",
+                    paddingTop: 28,
+                    background: `linear-gradient(transparent, ${T.bg} 30%)`,
+                    display: "flex", gap: 10, zIndex: 10,
+                }}>
+                    {/* Hide Back on step 1 (first research step) */}
+                    {!isFirstResearchStep && (
+                        <NavBtn
+                            onClick={handleBack}
+                            disabled={isNavigating}
+                            isLoading={false}
+                        >
+                            ← Back
+                        </NavBtn>
+                    )}
+
+                    {isLastStep ? (
+                        <NavBtn
+                            onClick={() => navigate("/")}
+                            primary
+                            disabled={isNavigating}
+                        >
+                            New Research ↗
+                        </NavBtn>
+                    ) : (
+                        <NavBtn
+                            onClick={handleNext}
+                            primary
+                            disabled={isNavigating}
+                        >
+                            {nextLabel}
+                        </NavBtn>
+                    )}
+                </div>
+            )}
         </div >
     );
 }
