@@ -77,13 +77,9 @@ Return ONLY valid JSON (no markdown fences, no preamble):
 }"""
 
 
-def _make_slug(ticker: str, title: str) -> str:
-    """Generate a URL-friendly slug from ticker and title."""
-    base = f"{ticker}-{title}".lower()
-    slug = re.sub(r'[^a-z0-9]+', '-', base).strip('-')
-    # Add date for uniqueness
-    today = date.today().strftime("%Y-%m-%d")
-    return f"{slug}-{today}"[:120]
+def _make_slug(ticker: str) -> str:
+    """Generate a clean, SEO-friendly slug from ticker."""
+    return f"{ticker.lower()}-stock-analysis"
 
 
 async def generate_blog_post(ticker: str, report_data: dict, report_id: str = None):
@@ -133,15 +129,20 @@ async def generate_blog_post(ticker: str, report_data: dict, report_id: str = No
         print(f"❌ Blog generation failed for {ticker}: {e}")
         return None
 
-    # ── EXTRACT VERDICT ──
+    # ── EXTRACT VERDICT & COMPANY NAME ──
     verdict = None
+    company_name = ""
     try:
         verdict = report_data.get("step_7_verdict", {}).get("action", "WATCH")
     except Exception:
         verdict = "WATCH"
+    try:
+        company_name = report_data.get("meta", {}).get("company_name", "")
+    except Exception:
+        company_name = ""
 
     # ── SAVE TO DB ──
-    slug = _make_slug(ticker.upper(), blog_data.get("title", ticker))
+    slug = _make_slug(ticker.upper())
 
     post = {
         "ticker": ticker.upper(),
@@ -150,12 +151,16 @@ async def generate_blog_post(ticker: str, report_data: dict, report_id: str = No
         "excerpt": blog_data.get("excerpt", "")[:200],
         "content": blog_data.get("content", ""),
         "verdict": verdict,
+        "company_name": company_name,
         "tags": blog_data.get("tags", [ticker.upper()]),
         "report_id": report_id,
     }
 
     try:
-        result = sb.table("blog_posts").insert(post).execute()
+        # Upsert: if slug already exists, update the post instead of failing
+        result = sb.table("blog_posts").upsert(
+            post, on_conflict="slug"
+        ).execute()
         print(f"✅ Blog: Published '{post['title']}' → /blog/{slug}")
         return result.data[0] if result.data else post
     except Exception as e:
@@ -168,6 +173,7 @@ async def generate_blog_post(ticker: str, report_data: dict, report_id: str = No
 
 
 # ─── API ENDPOINTS ───
+# NOTE: Specific routes MUST come before the /{slug} catch-all
 
 @router.get("")
 async def list_blog_posts(
@@ -182,7 +188,7 @@ async def list_blog_posts(
         raise HTTPException(503, "Database not configured")
 
     query = sb.table("blog_posts") \
-        .select("id, ticker, title, slug, excerpt, verdict, author_name, tags, views, created_at") \
+        .select("id, ticker, title, slug, excerpt, verdict, company_name, author_name, tags, views, created_at") \
         .order("created_at", desc=True)
 
     if verdict:
@@ -213,6 +219,60 @@ async def list_blog_posts(
     }
 
 
+@router.get("/all-slugs")
+async def all_slugs():
+    """Return all blog post slugs with tickers and dates (for sitemap generation)."""
+    sb = _get_sb()
+    if not sb:
+        return {"posts": []}
+
+    result = sb.table("blog_posts") \
+        .select("ticker, slug, company_name, verdict, created_at") \
+        .order("created_at", desc=True) \
+        .execute()
+
+    return {"posts": result.data or []}
+
+
+@router.post("/migrate-slugs")
+async def migrate_slugs():
+    """
+    One-time migration: update all existing blog post slugs
+    from old format (ticker-title-date) to new format (ticker-stock-analysis).
+    """
+    sb = _get_sb()
+    if not sb:
+        raise HTTPException(503, "Database not configured")
+
+    # Fetch all posts
+    all_posts = sb.table("blog_posts").select("id, ticker, slug").execute()
+    updated = 0
+    skipped = 0
+
+    for post in (all_posts.data or []):
+        new_slug = _make_slug(post["ticker"])
+        if post["slug"] == new_slug:
+            skipped += 1
+            continue
+        try:
+            sb.table("blog_posts") \
+                .update({"slug": new_slug}) \
+                .eq("id", post["id"]) \
+                .execute()
+            updated += 1
+            print(f"  ✅ {post['slug']} → {new_slug}")
+        except Exception as e:
+            # Slug conflict — another post already has this slug (same ticker)
+            print(f"  ⚠️ Conflict for {new_slug}: {e}")
+            skipped += 1
+
+    return {
+        "message": f"Migration complete. Updated: {updated}, Skipped: {skipped}",
+        "updated": updated,
+        "skipped": skipped,
+    }
+
+
 @router.get("/{slug}")
 async def get_blog_post(slug: str):
     """Get a single blog post by slug. Increments view count."""
@@ -240,3 +300,27 @@ async def get_blog_post(slug: str):
         pass
 
     return post
+
+
+@router.get("/{slug}/related")
+async def get_related_posts(slug: str):
+    """Get 3-5 related blog posts (most recent, excluding current ticker)."""
+    sb = _get_sb()
+    if not sb:
+        return {"posts": []}
+
+    # Get current post's ticker
+    current = sb.table("blog_posts").select("ticker").eq("slug", slug).execute()
+    current_ticker = current.data[0]["ticker"] if current.data else None
+
+    # Get recent posts excluding current ticker
+    query = sb.table("blog_posts") \
+        .select("ticker, title, slug, verdict, company_name, created_at") \
+        .order("created_at", desc=True) \
+        .limit(5)
+
+    if current_ticker:
+        query = query.neq("ticker", current_ticker)
+
+    result = query.execute()
+    return {"posts": result.data or []}

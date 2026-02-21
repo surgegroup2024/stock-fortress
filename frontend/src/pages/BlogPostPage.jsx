@@ -9,7 +9,80 @@ const VERDICT_COLORS = {
     AVOID: { bg: "#DC2626", text: "#FFF", label: "AVOID — Bearish" },
 };
 
-// Simple markdown-to-JSX renderer for blog content
+const SITE_URL = "https://stockfortress.com";
+const CURRENT_YEAR = new Date().getFullYear();
+
+// ─── SEO HELPERS ───
+function getSeoTitle(post) {
+    const company = post.company_name || post.ticker;
+    const verdict = post.verdict || "Watch";
+    const verdictText = verdict === "BUY" ? "Buy or Wait" : verdict === "AVOID" ? "Buy or Avoid" : "Buy, Watch, or Avoid";
+    return `${company} (${post.ticker}) Stock Analysis ${CURRENT_YEAR}: ${verdictText}? | Stock Fortress`;
+}
+
+function getMetaDescription(post) {
+    const company = post.company_name || post.ticker;
+    const verdict = post.verdict || "Watch";
+    const date = new Date(post.created_at || Date.now());
+    const month = date.toLocaleDateString("en-US", { month: "long" });
+    const year = date.getFullYear();
+    return `AI-powered 7-step analysis of ${company} (${post.ticker}). Financial health, valuation, risks, and verdict: ${verdict}. Updated ${month} ${year}. Free stock research.`;
+}
+
+function getCanonicalUrl(post) {
+    return `${SITE_URL}/blog/${post.ticker.toLowerCase()}-stock-analysis`;
+}
+
+function getArticleJsonLd(post) {
+    const company = post.company_name || post.ticker;
+    const created = post.created_at || new Date().toISOString();
+    return {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": getSeoTitle(post).replace(" | Stock Fortress", ""),
+        "description": getMetaDescription(post),
+        "datePublished": created,
+        "dateModified": post.updated_at || created,
+        "author": {
+            "@type": "Organization",
+            "name": "Stock Fortress",
+            "url": SITE_URL,
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Stock Fortress",
+            "logo": {
+                "@type": "ImageObject",
+                "url": `${SITE_URL}/icon-512.png`,
+            },
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": getCanonicalUrl(post),
+        },
+        "about": {
+            "@type": "FinancialProduct",
+            "name": `${company} (${post.ticker})`,
+            "tickerSymbol": post.ticker,
+        },
+    };
+}
+
+function getBreadcrumbJsonLd(post) {
+    const company = post.company_name || post.ticker;
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": `${SITE_URL}/` },
+            { "@type": "ListItem", "position": 2, "name": "Research Blog", "item": `${SITE_URL}/blog` },
+            { "@type": "ListItem", "position": 3, "name": `${company} (${post.ticker}) Analysis` },
+        ],
+    };
+}
+
+
+// ─── MARKDOWN RENDERER ───
 function renderMarkdown(md) {
     if (!md) return null;
     const lines = md.split("\n");
@@ -34,11 +107,8 @@ function renderMarkdown(md) {
     };
 
     const renderInline = (text) => {
-        // Bold
         text = text.replace(/\*\*(.+?)\*\*/g, "⟪b⟫$1⟪/b⟫");
-        // Italic
         text = text.replace(/\*(.+?)\*/g, "⟪i⟫$1⟪/i⟫");
-
         const parts = text.split(/(⟪\/?[bi]⟫)/);
         const result = [];
         let bold = false, italic = false;
@@ -61,7 +131,6 @@ function renderMarkdown(md) {
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
-        // Heading 2
         if (line.startsWith("## ")) {
             flushList();
             elements.push(
@@ -72,7 +141,6 @@ function renderMarkdown(md) {
             continue;
         }
 
-        // Heading 3
         if (line.startsWith("### ")) {
             flushList();
             elements.push(
@@ -83,20 +151,17 @@ function renderMarkdown(md) {
             continue;
         }
 
-        // List items
         if (line.match(/^[-*] /)) {
             inList = true;
             listItems.push(line.slice(2));
             continue;
         }
 
-        // Empty line
         if (line.trim() === "") {
             flushList();
             continue;
         }
 
-        // Paragraph
         flushList();
         elements.push(
             <p key={`p-${i}`} style={{ fontSize: 15, color: T.textSec, lineHeight: 1.75, marginBottom: 16 }}>
@@ -108,14 +173,93 @@ function renderMarkdown(md) {
     return elements;
 }
 
+
+// ─── CTA BOX COMPONENT ───
+function CtaBox({ ticker }) {
+    return (
+        <div style={{
+            margin: "32px 0", padding: "28px", borderRadius: 16,
+            background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
+            border: `1px solid ${T.accent}30`, textAlign: "center",
+        }}>
+            <div style={{ fontSize: 20, marginBottom: 8 }}>📊</div>
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: "#FFF", marginBottom: 8 }}>
+                Research {ticker} Yourself
+            </h3>
+            <p style={{ fontSize: 14, color: "#94A3B8", marginBottom: 16, lineHeight: 1.5 }}>
+                Want the full interactive report? Run your own 7-step analysis.
+            </p>
+            <Link to={`/report/${ticker}`} style={{
+                display: "inline-block", padding: "14px 32px", borderRadius: 12,
+                background: `linear-gradient(135deg,${T.accent},#059669)`, color: "#FFF",
+                fontSize: 15, fontWeight: 700, textDecoration: "none",
+                boxShadow: `0 8px 25px -6px ${T.accent}50`,
+                transition: "transform .2s ease",
+            }}
+                onMouseEnter={e => e.target.style.transform = "translateY(-2px)"}
+                onMouseLeave={e => e.target.style.transform = "translateY(0)"}
+            >
+                Research {ticker} Now — Free →
+            </Link>
+        </div>
+    );
+}
+
+
+// ─── RELATED POSTS COMPONENT ───
+function RelatedPosts({ posts }) {
+    if (!posts || posts.length === 0) return null;
+    const vc = (v) => VERDICT_COLORS[v] || VERDICT_COLORS.WATCH;
+    return (
+        <div style={{
+            marginTop: 40, padding: "28px", borderRadius: 16,
+            background: T.card, border: `1px solid ${T.border}`,
+        }}>
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: T.text, marginBottom: 16 }}>
+                Related Stock Analysis
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {posts.map((p, i) => (
+                    <Link key={i} to={`/blog/${p.slug}`} style={{
+                        textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "12px 16px", borderRadius: 10, background: T.surface, border: `1px solid ${T.border}`,
+                        transition: "all .2s",
+                    }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = T.accent; e.currentTarget.style.transform = "translateX(4px)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.transform = "translateX(0)"; }}
+                    >
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <span style={{
+                                padding: "3px 8px", borderRadius: 5, fontSize: 12, fontWeight: 700,
+                                fontFamily: "'IBM Plex Mono',monospace", background: `${T.accent}15`, color: T.accent,
+                            }}>{p.ticker}</span>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: T.text }}>
+                                {p.company_name || p.ticker} Stock Analysis
+                            </span>
+                        </div>
+                        {p.verdict && (
+                            <span style={{
+                                padding: "3px 8px", borderRadius: 5, fontSize: 11, fontWeight: 700,
+                                background: vc(p.verdict).bg, color: vc(p.verdict).text,
+                            }}>{p.verdict}</span>
+                        )}
+                    </Link>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
+// ─── MAIN PAGE COMPONENT ───
 export default function BlogPostPage() {
     const { slug } = useParams();
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [ticker, setTicker] = useState("");
     const [copied, setCopied] = useState(false);
+    const [relatedPosts, setRelatedPosts] = useState([]);
 
     useEffect(() => {
         setLoading(true);
@@ -126,7 +270,11 @@ export default function BlogPostPage() {
             })
             .then(data => {
                 setPost(data);
-                setTicker(data.ticker || "");
+                // Fetch related posts
+                fetch(`/api/blog/${slug}/related`)
+                    .then(r => r.json())
+                    .then(d => setRelatedPosts(d.posts || []))
+                    .catch(() => { });
             })
             .catch(() => setError("Article not found"))
             .finally(() => setLoading(false));
@@ -171,18 +319,47 @@ export default function BlogPostPage() {
     }
 
     const vc = VERDICT_COLORS[post.verdict] || VERDICT_COLORS.WATCH;
+    const seoTitle = getSeoTitle(post);
+    const metaDesc = getMetaDescription(post);
+    const canonicalUrl = getCanonicalUrl(post);
+    const companyName = post.company_name || post.ticker;
 
     return (
         <div style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif" }}>
             <style>{CSS}</style>
             <Helmet>
-                <title>{post.title} — Stock Fortress Research</title>
-                <meta name="description" content={post.excerpt} />
-                <link rel="canonical" href={`https://stockfortress.app/blog/${slug}`} />
-                <meta property="og:title" content={post.title} />
-                <meta property="og:description" content={post.excerpt} />
+                {/* SEO Title (Task 2) */}
+                <title>{seoTitle}</title>
+
+                {/* Meta Description (Task 3) */}
+                <meta name="description" content={metaDesc} />
+
+                {/* Canonical URL (Task 4) */}
+                <link rel="canonical" href={canonicalUrl} />
+
+                {/* Open Graph (Task 5) */}
                 <meta property="og:type" content="article" />
+                <meta property="og:title" content={seoTitle.replace(" | Stock Fortress", "")} />
+                <meta property="og:description" content={metaDesc} />
+                <meta property="og:url" content={canonicalUrl} />
+                <meta property="og:image" content={`${SITE_URL}/icon-512.png`} />
+                <meta property="og:site_name" content="Stock Fortress" />
+
+                {/* Twitter Card (Task 5) */}
                 <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={seoTitle.replace(" | Stock Fortress", "")} />
+                <meta name="twitter:description" content={metaDesc} />
+                <meta name="twitter:image" content={`${SITE_URL}/icon-512.png`} />
+
+                {/* Structured Data — Article (Task 6) */}
+                <script type="application/ld+json">
+                    {JSON.stringify(getArticleJsonLd(post))}
+                </script>
+
+                {/* Structured Data — Breadcrumb (Task 8) */}
+                <script type="application/ld+json">
+                    {JSON.stringify(getBreadcrumbJsonLd(post))}
+                </script>
             </Helmet>
 
             {/* Top Nav */}
@@ -198,6 +375,17 @@ export default function BlogPostPage() {
                 </Link>
                 <Link to="/blog" style={{ fontSize: 13, fontWeight: 600, color: T.textSec, textDecoration: "none" }}>← All Articles</Link>
             </nav>
+
+            {/* Breadcrumb Navigation (Task 8) */}
+            <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px 8px" }}>
+                <nav aria-label="breadcrumb" style={{ fontSize: 13, color: T.textDim }}>
+                    <Link to="/" style={{ color: T.textSec, textDecoration: "none" }}>Home</Link>
+                    <span style={{ margin: "0 6px", color: T.textDim }}>›</span>
+                    <Link to="/blog" style={{ color: T.textSec, textDecoration: "none" }}>Research Blog</Link>
+                    <span style={{ margin: "0 6px", color: T.textDim }}>›</span>
+                    <span style={{ color: T.text }}>{companyName} ({post.ticker}) Analysis</span>
+                </nav>
+            </div>
 
             {/* Article */}
             <article style={{ maxWidth: 720, margin: "0 auto", padding: "20px 24px 80px" }}>
@@ -216,18 +404,23 @@ export default function BlogPostPage() {
                         )}
                     </div>
 
+                    {/* H1 — Creative title (Task 7: only one H1 per page) */}
                     <h1 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 800, color: T.text, lineHeight: 1.2, marginBottom: 16, letterSpacing: -0.8 }}>
                         {post.title}
                     </h1>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                    {/* Published info with verdict (Task 7) */}
+                    <p style={{ fontSize: 13, color: T.textDim, lineHeight: 1.6, marginBottom: 0 }}>
+                        Published {formatDate(post.created_at)} · AI-Generated Analysis · Verdict: <strong style={{ color: vc.bg }}>{post.verdict || "WATCH"}</strong>
+                    </p>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginTop: 12 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ width: 28, height: 28, borderRadius: 14, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                 <span style={{ fontSize: 12, fontWeight: 700, color: "#FFF", fontFamily: "'IBM Plex Mono',monospace" }}>SF</span>
                             </div>
                             <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{post.author_name}</span>
                         </div>
-                        <span style={{ fontSize: 12, color: T.textDim }}>{formatDate(post.created_at)}</span>
                         <span style={{ fontSize: 12, color: T.textDim }}>{post.views || 0} views</span>
                     </div>
                 </div>
@@ -244,9 +437,11 @@ export default function BlogPostPage() {
                     })())}
                 </div>
 
+                {/* CTA Box — Early Hook (Task 8) */}
+                <CtaBox ticker={post.ticker} />
+
                 {/* ── PREMIUM CONTENT GATE ── */}
                 <div style={{ position: "relative", marginTop: 8 }}>
-                    {/* Blurred/Faded placeholder text */}
                     <div style={{
                         filter: "blur(5px)", WebkitFilter: "blur(5px)", userSelect: "none", pointerEvents: "none",
                         color: T.textDim, fontSize: 14, lineHeight: 1.8, padding: "20px 0"
@@ -256,8 +451,6 @@ export default function BlogPostPage() {
                         <p>Risk assessment scoring indicates moderate volatility with primary risks concentrated in competitive positioning and regulatory changes...</p>
                         <p>Earnings guidance for the upcoming quarter suggests management confidence with revenue expected to reach...</p>
                     </div>
-
-                    {/* Gradient Overlay */}
                     <div style={{
                         position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
                         background: `linear-gradient(180deg, ${T.bg}00 0%, ${T.bg}CC 25%, ${T.bg} 50%)`,
@@ -339,7 +532,7 @@ export default function BlogPostPage() {
 
                 {/* Share */}
                 <div style={{ marginTop: 32, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(shareUrl)}`}
+                    <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(seoTitle)}&url=${encodeURIComponent(canonicalUrl)}`}
                         target="_blank" rel="noopener noreferrer"
                         style={{
                             padding: "10px 20px", borderRadius: 10, background: "#1DA1F2", color: "#FFF",
@@ -347,7 +540,7 @@ export default function BlogPostPage() {
                         }}>
                         𝕏 Share
                     </a>
-                    <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                    <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}`}
                         target="_blank" rel="noopener noreferrer"
                         style={{
                             padding: "10px 20px", borderRadius: 10, background: "#0077B5", color: "#FFF",
@@ -363,6 +556,9 @@ export default function BlogPostPage() {
                         {copied ? "✓ Copied!" : "🔗 Copy Link"}
                     </button>
                 </div>
+
+                {/* Related Posts (Task 8) */}
+                <RelatedPosts posts={relatedPosts} />
             </article>
         </div>
     );

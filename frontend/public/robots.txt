@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard
-Disallow: /api
+Disallow: /dashboard/
+Disallow: /api/
 
-Sitemap: https://stockfortress.app/sitemap.xml
+Sitemap: https://stockfortress.com/api/sitemap.xml

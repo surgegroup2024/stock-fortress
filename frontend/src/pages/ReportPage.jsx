@@ -367,7 +367,7 @@ export default function ReportPage() {
             <Helmet>
                 <title>{metaTitle}</title>
                 <meta name="description" content={metaDesc} />
-                <link rel="canonical" href={`https://stockfortress.app/report/${ticker}`} />
+                <link rel="canonical" href={`https://stockfortress.com/report/${ticker}`} />
             </Helmet>
 
             {/* ─── HEADER ─── */}

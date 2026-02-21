@@ -202,7 +202,7 @@ export default function HomePage() {
             <Helmet>
                 <title>Stock Fortress — Research Any Stock In 3 Minutes</title>
                 <meta name="description" content="Free AI-powered stock research. Enter any ticker and get a full 7-step institutional-grade analysis in minutes. No signup required." />
-                <link rel="canonical" href="https://stockfortress.app/" />
+                <link rel="canonical" href="https://stockfortress.com/" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
             </Helmet>
 

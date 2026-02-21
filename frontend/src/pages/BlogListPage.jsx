@@ -84,9 +84,10 @@ export default function BlogListPage() {
         <div style={{ minHeight: "100vh", background: T.bg, fontFamily: "'Space Grotesk',sans-serif" }}>
             <style>{CSS}</style>
             <Helmet>
-                <title>Stock Research Blog — Stock Fortress</title>
-                <meta name="description" content="AI-powered stock analysis articles. Deep research on trending tickers, earnings breakdowns, and investment insights." />
-                <link rel="canonical" href="https://stockfortress.app/blog" />
+                <title>Stock Research Blog — Daily AI Stock Analysis | Stock Fortress</title>
+                <meta name="description" content="Free daily AI-powered stock analysis articles. AAPL, TSLA, NVDA, and 100+ more stocks analyzed with 7-step research reports. Updated daily." />
+                <link rel="canonical" href="https://stockfortress.com/blog" />
+                {verdict && <meta name="robots" content="noindex, follow" />}
             </Helmet>
 
             {/* Header */}

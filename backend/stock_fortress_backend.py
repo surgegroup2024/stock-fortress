@@ -33,7 +33,7 @@ load_dotenv(dotenv_path=env_path)
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 # AI Provider (configurable: gemini, openai, anthropic, perplexity)
 from ai_provider import ai_generate, AI_PROVIDER, AI_MODEL
@@ -343,6 +343,68 @@ def health():
         "gemini_configured": bool(GEMINI_KEY),
         "cache_entries": len(_cache),
     }
+
+
+# ─── SEO ENDPOINTS ───
+@app.get("/api/sitemap.xml")
+async def dynamic_sitemap():
+    """Auto-generated sitemap including all blog posts."""
+    from blog_engine import _get_sb
+    sb = _get_sb()
+
+    # Static pages
+    today = datetime.now().strftime("%Y-%m-%d")
+    urls = [
+        {"loc": "https://stockfortress.com/", "changefreq": "daily", "priority": "1.0", "lastmod": today},
+        {"loc": "https://stockfortress.com/blog", "changefreq": "daily", "priority": "0.9", "lastmod": today},
+        {"loc": "https://stockfortress.com/pricing", "changefreq": "weekly", "priority": "0.7", "lastmod": today},
+    ]
+
+    # Blog posts from database
+    if sb:
+        try:
+            result = sb.table("blog_posts") \
+                .select("slug, created_at") \
+                .order("created_at", desc=True) \
+                .execute()
+            for post in (result.data or []):
+                lastmod = post["created_at"][:10] if post.get("created_at") else today
+                urls.append({
+                    "loc": f"https://stockfortress.com/blog/{post['slug']}",
+                    "changefreq": "weekly",
+                    "priority": "0.8",
+                    "lastmod": lastmod,
+                })
+        except Exception as e:
+            print(f"⚠️ Sitemap: Failed to fetch blog posts: {e}")
+
+    # Build XML
+    xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml_parts.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for u in urls:
+        xml_parts.append("  <url>")
+        xml_parts.append(f"    <loc>{u['loc']}</loc>")
+        if u.get("lastmod"):
+            xml_parts.append(f"    <lastmod>{u['lastmod']}</lastmod>")
+        xml_parts.append(f"    <changefreq>{u['changefreq']}</changefreq>")
+        xml_parts.append(f"    <priority>{u['priority']}</priority>")
+        xml_parts.append("  </url>")
+    xml_parts.append("</urlset>")
+
+    return Response(content="\n".join(xml_parts), media_type="application/xml")
+
+
+@app.get("/robots.txt")
+def serve_robots():
+    """Dynamic robots.txt with sitemap reference."""
+    content = """User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+
+Sitemap: https://stockfortress.com/api/sitemap.xml
+"""
+    return Response(content=content, media_type="text/plain")
 
 
 # ─── STATIC FILE SERVING (Production) ───
