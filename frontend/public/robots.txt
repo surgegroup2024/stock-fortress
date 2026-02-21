@@ -3,4 +3,4 @@ Allow: /
 Disallow: /dashboard/
 Disallow: /api/
 
-Sitemap: https://stockfortress.com/api/sitemap.xml
+Sitemap: https://stockfortress.com/sitemap.xml

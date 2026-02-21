@@ -346,9 +346,11 @@ def health():
 
 
 # ─── SEO ENDPOINTS ───
-@app.get("/api/sitemap.xml")
-async def dynamic_sitemap():
-    """Auto-generated sitemap including all blog posts."""
+# NOTE: These MUST be registered before the SPA catch-all /{path:path}
+# so they are matched first. FastAPI matches routes in registration order.
+
+async def _build_sitemap_xml():
+    """Build sitemap XML content (shared by both /sitemap.xml and /api/sitemap.xml)."""
     from blog_engine import _get_sb
     sb = _get_sb()
 
@@ -391,7 +393,21 @@ async def dynamic_sitemap():
         xml_parts.append("  </url>")
     xml_parts.append("</urlset>")
 
-    return Response(content="\n".join(xml_parts), media_type="application/xml")
+    return "\n".join(xml_parts)
+
+
+@app.get("/sitemap.xml")
+async def sitemap_root():
+    """Serve sitemap at the standard root path Google expects."""
+    xml = await _build_sitemap_xml()
+    return Response(content=xml, media_type="application/xml")
+
+
+@app.get("/api/sitemap.xml")
+async def sitemap_api():
+    """Also serve sitemap at /api/ path for backwards compatibility."""
+    xml = await _build_sitemap_xml()
+    return Response(content=xml, media_type="application/xml")
 
 
 @app.get("/robots.txt")
@@ -402,9 +418,26 @@ Allow: /
 Disallow: /dashboard/
 Disallow: /api/
 
-Sitemap: https://stockfortress.com/api/sitemap.xml
+Sitemap: https://stockfortress.com/sitemap.xml
 """
     return Response(content=content, media_type="text/plain")
+
+
+# ─── WWW REDIRECT MIDDLEWARE ───
+# 301 redirect www.stockfortress.com → stockfortress.com
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import RedirectResponse
+
+class WwwRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        host = request.headers.get("host", "")
+        if host.startswith("www."):
+            # Build the non-www URL and 301 redirect
+            new_url = str(request.url).replace("://www.", "://", 1)
+            return RedirectResponse(url=new_url, status_code=301)
+        return await call_next(request)
+
+app.add_middleware(WwwRedirectMiddleware)
 
 
 # ─── STATIC FILE SERVING (Production) ───
@@ -413,9 +446,22 @@ if STATIC_DIR.exists():
     # Serve built frontend assets (JS, CSS, images)
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
-    # Serve other static files (manifest.json, icons, etc.)
+    # Files that should NEVER be served by the SPA fallback
+    # (they have their own dedicated routes above)
+    SEO_FILES = {"sitemap.xml", "robots.txt"}
+
     @app.get("/{path:path}")
     async def serve_spa(path: str):
+        # Never intercept SEO files — they have dedicated handlers above
+        if path in SEO_FILES:
+            # This shouldn't normally be reached (dedicated routes match first),
+            # but as a safety net, return the correct response
+            if path == "sitemap.xml":
+                xml = await _build_sitemap_xml()
+                return Response(content=xml, media_type="application/xml")
+            if path == "robots.txt":
+                return serve_robots()
+
         file_path = STATIC_DIR / path
         if file_path.is_file():
             return FileResponse(file_path)
