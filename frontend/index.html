@@ -19,14 +19,32 @@
   <link rel="manifest" href="/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-5XS3J2JQ');</script>
+  <!-- End Google Tag Manager -->
+
   <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BF2BV5G5RK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
+    
+    // GA4 Configuration
+    gtag('config', 'G-BF2BV5G5RK');
+    
+    // Google Ads Configuration
+    gtag('config', 'AW-17613442648');
+    
+    // Campaign tracking
+    gtag('set', {'campaign_id': '23064038547'});
   </script>
+  <!-- Google Ads Conversion Tracking: See src/lib/tracking.js for implementation -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -50,6 +68,11 @@
 </head>
 
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5XS3J2JQ"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  
   <div id="root"></div>
   <script type="module" src="/main.jsx"></script>
 </body>

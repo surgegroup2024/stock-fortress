@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { syncCheckoutSession } from '../api/billingApi';
+import { trackPurchaseConversion } from '../../lib/tracking';
 
 export function StripeReturnHandler({ user, refreshSubscription, showToast }) {
     useEffect(() => {
@@ -21,8 +22,21 @@ export function StripeReturnHandler({ user, refreshSubscription, showToast }) {
 
                 showToast?.('Finalizing your upgrade…', 'info');
 
-                await syncCheckoutSession({ sessionId });
+                const result = await syncCheckoutSession({ sessionId });
                 await refreshSubscription?.();
+
+                // Track purchase conversion for Google Ads
+                if (result?.subscription) {
+                    const planName = result.subscription.plan_name || 'Pro';
+                    const amount = result.subscription.amount || 7.99;
+                    
+                    trackPurchaseConversion({
+                        planName,
+                        amount,
+                        currency: 'USD',
+                        transactionId: sessionId
+                    });
+                }
 
                 showToast?.(stripeSuccess ? 'Plan upgraded successfully! 🎉' : 'Payment processed', 'success');
             } catch (error) {

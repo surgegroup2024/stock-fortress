@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthProvider";
 import { T, CSS } from "../theme";
 import { Helmet } from "react-helmet-async";
+import { trackSignupConversion } from "../lib/tracking";
 
 export default function SignupPage() {
     const { signUp } = useAuth();
@@ -18,8 +19,13 @@ export default function SignupPage() {
         setLoading(true);
         setError("");
         const { error } = await signUp(email, password, name);
-        if (error) setError(error.message);
-        else navigate("/dashboard");
+        if (error) {
+            setError(error.message);
+        } else {
+            // Track successful signup conversion for Google Ads
+            trackSignupConversion(email);
+            navigate("/dashboard");
+        }
         setLoading(false);
     };
 
