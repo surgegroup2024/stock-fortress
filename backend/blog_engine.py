@@ -188,7 +188,7 @@ async def list_blog_posts(
         raise HTTPException(503, "Database not configured")
 
     query = sb.table("blog_posts") \
-        .select("id, ticker, title, slug, excerpt, verdict, company_name, author_name, tags, views, created_at") \
+        .select("id, ticker, title, slug, excerpt, verdict, tags, views, created_at") \
         .order("created_at", desc=True)
 
     if verdict:
